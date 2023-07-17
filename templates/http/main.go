@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"go_utils/utils"
 	"go_utils/utils/quickserver"
@@ -29,6 +30,15 @@ func handleRoot(w http.ResponseWriter, req *http.Request) {
 }
 
 func main() {
+	var verboseFlag = flag.Bool("v", false, "debug")
+	flag.Parse()
+	if *verboseFlag {
+		utils.SetLogLevelDebug()
+	} else {
+		utils.SetLogLevelInfo()
+	}
+	utils.LogPrintInfo("Log level: ", utils.LogLevel)
+
 	prepareAssetDict()
 
 	muxUser := http.NewServeMux()

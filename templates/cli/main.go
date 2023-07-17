@@ -14,6 +14,7 @@ func main() {
 	} else {
 		utils.SetLogLevelInfo()
 	}
+	utils.LogPrintInfo("Log level: ", utils.LogLevel)
 
 	// otherArgs := flag.Args()
 
