@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+    h1 {
+        color: DarkMagenta;
+    }
+	table, th, td {
+		border: 1px solid black;
+	}
+    input {
+        margin: 5px;
+    }
+	th, td {
+		padding: 5px;
+	}
+    div {
+        margin: 10px;
+        margin-top: 20px;
+    }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>Demo Manager</h1>
+        <p>a simple manager</p>
+        <button><a href="/">Refresh</a></button>
+    </div>
+	<div>
+        <table>
+            <tr>
+                <th>name</th>
+                <th>status</th>
+            </tr>
+            <tr>
+                <td>{{ .Title }}</td>
+                <td>Tets</td>
+            </tr>
+        </table>
+	</div>
+    <div>
+        <form action="/" method="post" enctype="application/x-www-form-urlencoded">
+            <fieldset>
+                <legend>Actions</legend>
+
+                <label for="name">name:</label>
+                <input type="text" id="name" name="name_list" value="111,222"><br>
+
+                <input type="radio" id="start" name="action" value="start">
+                <label for="start">start</label><br>
+                <input type="radio" id="stop" name="action" value="stop">
+                <label for="stop">stop</label><br>
+                <input type="radio" id="update" name="action" value="update">
+                <label for="update">update</label><br>
+
+                <input type="submit" id="submit"><br>
+            </fieldset>
+        </form>
+    </div>
+    <div>
+        <p>{{ .Info }}</p>
+    </div>
+</body>
+</html>

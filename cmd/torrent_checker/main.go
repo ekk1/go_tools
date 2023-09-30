@@ -18,6 +18,24 @@ func getBytesHash(data []byte) []byte {
 	return h.Sum(nil)
 }
 
+func getReadPositionByTorrentOffset(tt *torrent.Torrent, offset int64) (string, int64, error) {
+	var currentCursor int64 = 0
+
+	for _, file := range tt.Info.Files {
+		fileFullPath := tt.Info.Name + "/" + file.Path
+
+		endCursor := currentCursor + file.Length
+
+		if offset >= currentCursor && offset < endCursor {
+			return fileFullPath, offset - currentCursor, nil
+		}
+
+		currentCursor += file.Length
+	}
+
+	return "", 0, errors.New("Failed to find file")
+}
+
 func main() {
 	utils.SetLogLevelInfo()
 
@@ -145,22 +163,4 @@ func main() {
 	fmt.Println()
 	utils.LogPrintInfo("Success blocks:\t", successBlocks)
 	utils.LogPrintInfo("Failure blocks:\t", failedBlocks)
-}
-
-func getReadPositionByTorrentOffset(tt *torrent.Torrent, offset int64) (string, int64, error) {
-	var currentCursor int64 = 0
-
-	for _, file := range tt.Info.Files {
-		fileFullPath := tt.Info.Name + "/" + file.Path
-
-		endCursor := currentCursor + file.Length
-
-		if offset >= currentCursor && offset < endCursor {
-			return fileFullPath, offset - currentCursor, nil
-		}
-
-		currentCursor += file.Length
-	}
-
-	return "", 0, errors.New("Failed to find file")
 }
