@@ -41,7 +41,8 @@ func NewHTTPClient() *HTTPClient {
 		Transport: ts,
 	}
 	return &HTTPClient{
-		c: c,
+		c:       c,
+		headers: http.Header{},
 	}
 }
 

@@ -35,14 +35,23 @@
                 <th>name</th>
                 <th>status</th>
             </tr>
+{{ range $n,$v := .Lister }}
             <tr>
-                <td>{{ .Title }}</td>
-                <td>Tets</td>
+                <td>{{ $n }}</td>
+                <td>{{ $v }}</td>
             </tr>
+{{ end }}
+{{ range $k,$v := .Mapper }}
+            <tr>
+                <td>{{ $k }}</td>
+                <td>{{ $v }}</td>
+            </tr>
+{{ end }}
         </table>
 	</div>
     <div>
-        <form action="/" method="post" enctype="application/x-www-form-urlencoded">
+        <!--<form action="/" method="post" enctype="application/x-www-form-urlencoded"> </!-->
+        <form action="/" method="post">
             <fieldset>
                 <legend>Actions</legend>
 
@@ -56,12 +65,14 @@
                 <input type="radio" id="update" name="action" value="update">
                 <label for="update">update</label><br>
 
+                <input type="file" name="testfile">
+
                 <input type="submit" id="submit"><br>
             </fieldset>
         </form>
     </div>
     <div>
-        <p>{{ .Info }}</p>
+        <p>{{ .Msg }}</p>
     </div>
 </body>
 </html>

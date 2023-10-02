@@ -13,40 +13,79 @@ import (
 //go:embed index.html
 var indexHTML string
 
-var indexTemplate *template.Template
+var indexTemplate = template.Must(template.New("index").Parse(indexHTML))
 
-type Page struct {
-	Title string
-	Info  string
+type Subscribe struct {
+	URL         string
+	LastUpdated string
+	Content     string
+}
+
+func (s *Subscribe) Update() error {
+	return nil
+}
+
+func (s *Subscribe) Save() error {
+	return nil
+}
+
+func LoadSubscribe() ([]*Subscribe, error) {
+	return nil, nil
+
+}
+
+type PageData struct {
+	Title     string
+	Msg       string
+	Lister    []string
+	Mapper    map[string]string
+	Subscribe []*Subscribe
 }
 
 func handleRoot(w http.ResponseWriter, req *http.Request) {
+	utils.ServerLog("root", req)
+
+	// Deny req not to /
 	if req.URL.Path != "/" {
 		w.WriteHeader(http.StatusNotFound)
 		w.Write([]byte(""))
 	}
-	utils.LogPrintInfo(
-		req.RemoteAddr,
-		req.Method,
-		req.URL.Path,
-		req.Header,
-	)
-	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		utils.LogPrintError(err)
+
+	// Print headers if debug
+	for k, v := range req.Header {
+		utils.LogPrintDebug(k, v)
 	}
-	utils.LogPrintInfo(string(data))
-	if err := req.ParseForm(); err != nil {
-		utils.LogPrintError("Failed to parse form")
-		utils.LogPrintError(err)
+	if req.Method == http.MethodPost {
+		postData := req.FormValue("name_list")
+		if postData == "" {
+			utils.LogPrintWarning("No postData")
+		} else {
+			utils.LogPrintInfo("POST DATA:", postData)
+		}
+		f, fHeader, err := req.FormFile("testfile")
+		if err != nil {
+			utils.LogPrintWarning("No file")
+			utils.LogPrintWarning(err)
+		} else {
+			utils.LogPrintInfo(fHeader)
+			defer f.Close()
+			data, _ := io.ReadAll(f)
+			utils.LogPrintInfo(data)
+		}
 	}
-	utils.LogPrintInfo(
-		req.Form,
-		req.PostForm,
-		req.FormValue("name_list"),
-		req.FormValue("name_list2"),
-	)
-	if err := indexTemplate.ExecuteTemplate(w, "index", &Page{Title: "test", Info: "testinfo"}); err != nil {
+
+	// if err := indexTemplate.ExecuteTemplate(w, "index", &PageData{Title: "test", Info: "testinfo"}); err != nil {
+	pageData := &PageData{
+		Title:  "test",
+		Msg:    "msg",
+		Lister: []string{"1", "2"},
+		Mapper: map[string]string{
+			"k1": "v1",
+			"k2": "v2",
+			"k3": "v3",
+		},
+	}
+	if err := indexTemplate.ExecuteTemplate(w, "index", pageData); err != nil {
 		utils.LogPrintError(err)
 		w.WriteHeader(http.StatusInternalServerError)
 		w.Write([]byte("Failed to execute template"))
@@ -68,10 +107,6 @@ func main() {
 	case 4:
 		utils.SetLogLevelDebug4()
 	}
-
-	t := template.New("index")
-	indexTemplate = template.Must(t.Parse(indexHTML))
-	utils.LogPrintInfo(indexTemplate)
 
 	muxUser := http.NewServeMux()
 	muxUser.HandleFunc("/", handleRoot)
