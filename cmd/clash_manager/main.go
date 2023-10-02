@@ -7,6 +7,7 @@ import (
 	"html/template"
 	"io"
 	"net/http"
+	"os"
 	"sync"
 )
 
@@ -70,7 +71,7 @@ func handleRoot(w http.ResponseWriter, req *http.Request) {
 			utils.LogPrintInfo(fHeader)
 			defer f.Close()
 			data, _ := io.ReadAll(f)
-			utils.LogPrintInfo(data)
+			os.WriteFile("tetset", data, 0666)
 		}
 	}
 
