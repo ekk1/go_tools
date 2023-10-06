@@ -5,6 +5,6 @@ cp -r \
     $PACKAGE_BASE/bencode \
     $PACKAGE_BASE/torrent \
     $PACKAGE_BASE/screen \
-    $PACKAGE_BASE/redis \
+    $PACKAGE_BASE/minikv \
     $PACKAGE_BASE/*.go \
     vendor/go_utils/utils/
