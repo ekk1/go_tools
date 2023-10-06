@@ -84,6 +84,7 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 
 	ret, err := h.c.Do(req)
 	if err != nil {
+		LogPrintError("Failed to do request")
 		return nil, err
 	}
 	LogPrintDebug2("HTTP Status: ", ret.Status)

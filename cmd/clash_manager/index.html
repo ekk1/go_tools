@@ -32,19 +32,17 @@
 	<div>
         <table>
             <tr>
-                <th>name</th>
-                <th>status</th>
+                <th>Name</th>
+                <th>Last</th>
+                <th></th>
+                <th></th>
             </tr>
-{{ range $n,$v := .Lister }}
+{{ range .Subscribe }}
             <tr>
-                <td>{{ $n }}</td>
-                <td>{{ $v }}</td>
-            </tr>
-{{ end }}
-{{ range $k,$v := .Mapper }}
-            <tr>
-                <td>{{ $k }}</td>
-                <td>{{ $v }}</td>
+                <td>{{ .Name }}</td>
+                <td>{{ .LastUpdated }}</td>
+                <td><a href="/update?name={{ .Name }}">Update</a></td>
+                <td><a href="/delete?name={{ .Name }}">Delete</a></td>
             </tr>
 {{ end }}
         </table>
@@ -52,24 +50,46 @@
     <div>
         <form action="/" method="post" enctype="multipart/form-data">
             <fieldset>
-                <legend>Actions</legend>
+                <legend>Add sub</legend>
 
                 <label for="name">name:</label>
-                <input type="text" id="name" name="name_list" value="111,222"><br>
+                <input type="text" id="name" name="name" value="ss"><br>
 
-                <input type="radio" id="start" name="action" value="start">
-                <label for="start">start</label><br>
-                <input type="radio" id="stop" name="action" value="stop">
-                <label for="stop">stop</label><br>
-                <input type="radio" id="update" name="action" value="update">
-                <label for="update">update</label><br>
+                <label for="url">url:</label>
+                <input type="url" id="url" name="url" value="https://"><br>
 
-                <input type="file" name="testfile">
-
-                <input type="submit" id="submit"><br>
+                <input type="submit" id="submit" name="action" value="add"><br>
             </fieldset>
         </form>
     </div>
+	<div>
+        <table>
+            <tr>
+                <th>Proxy</th>
+                <th>NOW: p1</th>
+            </tr>
+            <tr>
+                <td>p1</td>
+                <td><a href="/update?name=">Select</a></td>
+            </tr>
+        </table>
+	</div>
+	<div>
+        <table>
+            <tr>
+                <th>Node</th>
+                <th>NOW: HK1</th>
+            </tr>
+            <tr>
+                <td>HK1</td>
+                <td><a href="/update?name=">Select</a></td>
+            </tr>
+            <tr>
+                <td>HK2</td>
+                <td><a href="/update?name=">Select</a></td>
+            </tr>
+        </table>
+	</div>
     <div>
         <p>{{ .Msg }}</p>
     </div>
