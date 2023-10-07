@@ -19,6 +19,7 @@ type HTTPClient struct {
 	c        *http.Client
 	json     bool
 	form     bool
+	rawSend  bool
 	headers  http.Header
 	username string
 	password string
@@ -46,9 +47,19 @@ func NewHTTPClient() *HTTPClient {
 	}
 }
 
+func countTrue(args ...bool) int64 {
+	ret := int64(0)
+	for _, v := range args {
+		if v {
+			ret++
+		}
+	}
+	return ret
+}
+
 func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPResponse, error) {
-	if h.json && h.form {
-		return nil, errors.New("json and form cannot both be set")
+	if countTrue(h.json, h.form, h.rawSend) > 1 {
+		return nil, errors.New("can not use multiple body types")
 	}
 	var sendBody io.Reader = nil
 	// 1. body is JSON
@@ -66,6 +77,13 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 			sendBody = strings.NewReader(f.Encode())
 		} else {
 			return nil, errors.New("Body needs to be url.Values")
+		}
+	}
+	if h.rawSend && body != nil {
+		if f, ok := body.([]byte); ok {
+			sendBody = bytes.NewReader(f)
+		} else {
+			return nil, errors.New("Body needs to be []byte")
 		}
 	}
 	// 3.
@@ -110,6 +128,17 @@ func (h *HTTPClient) SetSendJSON(isSendJSON bool) bool {
 func (h *HTTPClient) SetSendForm(isSendForm bool) bool {
 	h.form = isSendForm
 	h.SetHeader("Content-Type", "application/x-www-form-urlencoded")
+	return h.form
+}
+
+func (h *HTTPClient) SetSendRawBody(isSendRawBody bool) bool {
+	h.rawSend = isSendRawBody
+	return h.rawSend
+}
+
+func (h *HTTPClient) SetSendMultiPartForm(isSendForm bool) bool {
+	h.form = isSendForm
+	h.SetHeader("Content-Type", "multipart/form-data")
 	return h.form
 }
 
