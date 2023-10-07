@@ -5,6 +5,29 @@ import (
 	"net/http"
 )
 
+func ServerCheckPath(expect string, req *http.Request, w http.ResponseWriter) bool {
+	if req.URL.Path != expect {
+		ServerError("Not found", w, req)
+		return false
+	}
+	return true
+}
+
+func ServerCheckParam(args ...string) bool {
+	for _, v := range args {
+		if v == "" {
+			return false
+		}
+	}
+	return true
+}
+
+func ServerDebugHeader(r *http.Request) {
+	for k, v := range r.Header {
+		LogPrintDebug2("Header:", k, v)
+	}
+}
+
 func ServerLog(caller string, r *http.Request) {
 	LogPrintInfo(fmt.Sprintf(
 		"[%s]: got %s from %s for %s, Host: %s",
