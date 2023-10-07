@@ -66,28 +66,28 @@
         <table>
             <tr>
                 <th>Proxy</th>
-                <th>NOW: p1</th>
+                <th>NOW: {{ .CurrentProxy }}</th>
             </tr>
+            {{ range .AllProxies }}
             <tr>
-                <td>p1</td>
-                <td><a href="/update?name=">Select</a></td>
+                <td>{{ . }}</td>
+                <td><a href="/selectproxy?name={{ . }}">Select</a></td>
             </tr>
+            {{ end }}
         </table>
 	</div>
 	<div>
         <table>
             <tr>
                 <th>Node</th>
-                <th>NOW: HK1</th>
+                <th>NOW: {{ .CurrentNode }}</th>
             </tr>
+            {{ range .AllNodes }}
             <tr>
-                <td>HK1</td>
-                <td><a href="/update?name=">Select</a></td>
+                <td>{{ . }}</td>
+                <td><a href="/selectnode?name={{ . }}">Select</a></td>
             </tr>
-            <tr>
-                <td>HK2</td>
-                <td><a href="/update?name=">Select</a></td>
-            </tr>
+            {{ end }}
         </table>
 	</div>
     <div>

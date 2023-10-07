@@ -1,29 +1,101 @@
 package main
 
 import (
-	_ "embed"
 	"go_utils/utils"
 	"net/http"
+	"slices"
+)
+
+var (
+	pageMsg      string
+	CurrentProxy string   = "p2"
+	AllProxies   []string = []string{"p2", "p3"}
+	CurrentNode  string
+	AllNodes     []string
 )
 
 type PageData struct {
-	Title     string
-	Msg       string
-	Lister    []string
-	Mapper    map[string]string
-	Subscribe []*Subscribe
+	Title        string
+	Msg          string
+	Subscribe    []*Subscribe
+	CurrentProxy string
+	AllProxies   []string
+	CurrentNode  string
+	AllNodes     []string
 }
 
-func PreparePageData() *PageData {
-	return &PageData{
-		Title:     "test",
-		Msg:       "msg",
-		Subscribe: LoadSubscribe(),
+func onlineSaveSS(ss *Subscribe, req *http.Request, w http.ResponseWriter) bool {
+	if err := ss.Save(); err != nil {
+		utils.LogPrintError(err)
+		utils.ServerError("failed to save db", w, req)
+		return false
 	}
+	return true
+}
+
+func renderPage(w http.ResponseWriter, req *http.Request) {
+	allNodes, nowNode, err := GetNodesByProxy(CurrentProxy)
+	if err != nil {
+		utils.LogPrintError(err)
+		utils.ServerError("Failed get nodes", w, req)
+		return
+	}
+	CurrentNode = nowNode
+	AllNodes = allNodes
+	data := PageData{
+		Title:        "test",
+		Msg:          pageMsg,
+		Subscribe:    LoadSubscribe(),
+		CurrentProxy: CurrentProxy,
+		AllProxies:   AllProxies,
+		CurrentNode:  nowNode,
+		AllNodes:     allNodes,
+	}
+	if err := indexTemplate.ExecuteTemplate(w, "index", data); err != nil {
+		utils.LogPrintError(err)
+		utils.ServerError("Failed to exec template", w, req)
+	}
+}
+
+func handleSelectProxy(w http.ResponseWriter, req *http.Request) {
+	utils.ServerLog("selectProxy", req)
+	if !utils.ServerCheckPath("/selectproxy", req, w) {
+		return
+	}
+	ppName := req.URL.Query().Get("name")
+	if slices.Contains(AllProxies, ppName) {
+		CurrentProxy = ppName
+	} else {
+		utils.ServerError("No proxy named "+ppName, w, req)
+	}
+	renderPage(w, req)
+}
+
+func handleSelectNode(w http.ResponseWriter, req *http.Request) {
+	utils.ServerLog("selectNodes", req)
+	if !utils.ServerCheckPath("/selectnode", req, w) {
+		return
+	}
+	ppName := req.URL.Query().Get("name")
+	if slices.Contains(AllNodes, ppName) {
+		utils.LogPrintInfo("Selecting", ppName, "for", CurrentProxy)
+		err := ChangeNodeForProxy(CurrentProxy, ppName)
+		if err != nil {
+			utils.LogPrintError(err)
+			utils.ServerError("Failed to select node", w, req)
+		}
+	} else {
+		utils.ServerError("No proxy named "+ppName, w, req)
+	}
+	renderPage(w, req)
 }
 
 func handleUpdete(w http.ResponseWriter, req *http.Request) {
 	utils.ServerLog("update", req)
+	if !utils.ServerCheckPath("/update", req, w) {
+		return
+	}
+
 	ssName := req.URL.Query().Get("name")
 	utils.LogPrintInfo("Updating: ", ssName)
 
@@ -37,21 +109,18 @@ func handleUpdete(w http.ResponseWriter, req *http.Request) {
 		utils.ServerError("failed to update", w, req)
 		return
 	}
-	if err := ss.Save(); err != nil {
-		utils.LogPrintError(err)
-		utils.ServerError("failed to save db", w, req)
+	if !onlineSaveSS(ss, req, w) {
 		return
 	}
-
-	if err := indexTemplate.ExecuteTemplate(w, "index", PreparePageData()); err != nil {
-		utils.LogPrintError(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to execute template"))
-	}
+	renderPage(w, req)
 }
 
 func handleDelete(w http.ResponseWriter, req *http.Request) {
 	utils.ServerLog("delete", req)
+	if !utils.ServerCheckPath("/delete", req, w) {
+		return
+	}
+
 	ssName := req.URL.Query().Get("name")
 	utils.LogPrintInfo("Deleting: ", ssName)
 	kv.Delete(ssPrefix + ssName)
@@ -61,36 +130,21 @@ func handleDelete(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	if err := indexTemplate.ExecuteTemplate(w, "index", PreparePageData()); err != nil {
-		utils.LogPrintError(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to execute template"))
-	}
+	renderPage(w, req)
 }
 
 func handleRoot(w http.ResponseWriter, req *http.Request) {
 	utils.ServerLog("root", req)
-
-	// Deny req not to /
-	if req.URL.Path != "/" {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte(""))
+	if !utils.ServerCheckPath("/", req, w) {
+		return
 	}
 
-	// Print headers if debug
-	for k, v := range req.Header {
-		utils.LogPrintDebug(k, v)
-	}
 	if req.Method == http.MethodPost {
 		ssName := req.FormValue("name")
 		ssAction := req.FormValue("action")
 		ssURL := req.FormValue("url")
-		utils.LogPrintInfo(ssAction, ssName, ssURL)
-		if ssAction == "" {
-			utils.ServerError("Failed to decide ssAction", w, req)
-			return
-		}
-		if ssName == "" || ssURL == "" {
+		utils.LogPrintInfo("Got sub:", ssAction, ssName)
+		if !utils.ServerCheckParam(ssName, ssAction, ssURL) {
 			utils.ServerError("Field can not be empty", w, req)
 			return
 		}
@@ -98,16 +152,9 @@ func handleRoot(w http.ResponseWriter, req *http.Request) {
 			Name: ssName,
 			URL:  ssURL,
 		}
-		if err := ss.Save(); err != nil {
-			utils.ServerError("Failed to save ss", w, req)
-			utils.LogPrintError(err)
+		if !onlineSaveSS(ss, req, w) {
 			return
 		}
 	}
-
-	if err := indexTemplate.ExecuteTemplate(w, "index", PreparePageData()); err != nil {
-		utils.LogPrintError(err)
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to execute template"))
-	}
+	renderPage(w, req)
 }

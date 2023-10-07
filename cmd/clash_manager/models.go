@@ -1,7 +1,6 @@
 package main
 
 import (
-	_ "embed"
 	"encoding/base64"
 	"encoding/json"
 	"go_utils/utils"

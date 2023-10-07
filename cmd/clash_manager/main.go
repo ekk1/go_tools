@@ -60,6 +60,8 @@ func main() {
 	muxUser.HandleFunc("/", handleRoot)
 	muxUser.HandleFunc("/delete", handleDelete)
 	muxUser.HandleFunc("/update", handleUpdete)
+	muxUser.HandleFunc("/selectproxy", handleSelectProxy)
+	muxUser.HandleFunc("/selectnode", handleSelectNode)
 	addrUser := "127.0.0.1:8888"
 	serverUser := http.Server{
 		Addr:    addrUser,
