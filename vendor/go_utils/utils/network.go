@@ -133,6 +133,7 @@ func (h *HTTPClient) SetSendForm(isSendForm bool) bool {
 
 func (h *HTTPClient) SetSendRawBody(isSendRawBody bool) bool {
 	h.rawSend = isSendRawBody
+	h.SetHeader("Content-Type", "application/octet-stream")
 	return h.rawSend
 }
 
