@@ -2,6 +2,7 @@ package main
 
 import (
 	"go_utils/utils"
+	"go_utils/utils/myhttp"
 	"net/http"
 )
 
@@ -17,7 +18,7 @@ type Proxy struct {
 }
 
 func GetNodesByProxy(p string) ([]string, string, error) {
-	c := utils.NewHTTPClient()
+	c := myhttp.NewHTTPClient()
 	ret, err := c.SendReq(http.MethodGet, clashManagerAddr+"/proxies/"+p, nil)
 	if err != nil {
 		return nil, "", err
@@ -33,7 +34,7 @@ func GetNodesByProxy(p string) ([]string, string, error) {
 }
 
 func ChangeNodeForProxy(p, n string) error {
-	c := utils.NewHTTPClient()
+	c := myhttp.NewHTTPClient()
 	c.SetSendJSON(true)
 	sendDict := map[string]string{"name": n}
 	ret, err := c.SendReq(http.MethodPut, clashManagerAddr+"/proxies/"+p, sendDict)

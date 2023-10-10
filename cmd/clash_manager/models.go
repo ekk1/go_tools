@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"go_utils/utils"
+	"go_utils/utils/myhttp"
 	"net/http"
 	"time"
 )
@@ -18,7 +19,7 @@ type Subscribe struct {
 }
 
 func (s *Subscribe) Update() error {
-	c := utils.NewHTTPClient()
+	c := myhttp.NewHTTPClient()
 	if err := c.SetProxy("http://127.0.0.1:7890"); err != nil {
 		return err
 	}

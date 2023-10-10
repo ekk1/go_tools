@@ -1,4 +1,4 @@
-package utils
+package myhttp
 
 import (
 	"bytes"
@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"go_utils/utils"
 	"io"
 	"net"
 	"net/http"
@@ -68,7 +69,7 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 		if err != nil {
 			return nil, err
 		}
-		LogPrintDebug3("Sending JSON: ", string(sendJson))
+		utils.LogPrintDebug3("Sending JSON: ", string(sendJson))
 		sendBody = bytes.NewBuffer(sendJson)
 	}
 	// 2. body is form
@@ -102,19 +103,19 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 
 	ret, err := h.c.Do(req)
 	if err != nil {
-		LogPrintError("Failed to do request")
+		utils.LogPrintError("Failed to do request")
 		return nil, err
 	}
-	LogPrintDebug2("HTTP Status: ", ret.Status)
-	LogPrintDebug2("HTTP Headers: ", ret.Header)
+	utils.LogPrintDebug2("HTTP Status: ", ret.Status)
+	utils.LogPrintDebug2("HTTP Headers: ", ret.Header)
 	defer ret.Body.Close()
 
 	data, err := io.ReadAll(ret.Body)
 	if err != nil {
 		return nil, err
 	}
-	LogPrintDebug4("HTTP BodyBytes: ", data)
-	LogPrintDebug3("HTTP BodyString: ", string(data))
+	utils.LogPrintDebug4("HTTP BodyBytes: ", data)
+	utils.LogPrintDebug3("HTTP BodyString: ", string(data))
 
 	return &HTTPResponse{data: data}, nil
 }
@@ -171,13 +172,13 @@ func (h *HTTPClient) SetCustomCert(certPath []string) error {
 	for _, cert := range certPath {
 		pem, err := os.ReadFile(cert)
 		if err != nil {
-			LogPrintError("Failed to load cert: ", cert)
+			utils.LogPrintError("Failed to load cert: ", cert)
 			continue
 		}
 		if ok := certPool.AppendCertsFromPEM(pem); !ok {
-			LogPrintError("Failed to apply cert: ", cert)
+			utils.LogPrintError("Failed to apply cert: ", cert)
 		}
-		LogPrintDebug("Adding cert: ", cert)
+		utils.LogPrintDebug("Adding cert: ", cert)
 		didAddCert = true
 	}
 	if didAddCert {

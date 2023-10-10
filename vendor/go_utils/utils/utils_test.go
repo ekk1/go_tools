@@ -21,3 +21,13 @@ func TestListDirFiles(t *testing.T) {
 		LogPrintError(err)
 	}
 }
+
+func TestSome(t *testing.T) {
+	aa := map[string]int64{}
+	t.Log(aa)
+	aa["test"]++
+	aa["test"]++
+	aa["test"]++
+	aa["test"]++
+	t.Log(aa)
+}
