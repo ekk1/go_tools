@@ -4,112 +4,184 @@ import (
 	"fmt"
 )
 
-// <h[1-6]>
-type Header struct {
-	Level int
-	Text  string
-	Tag   string
+type Element struct {
+	Tag        string
+	Attributes map[string]string
+	Value      string
+	ValueEnd   string
+	EndTag     string
+	Children   []WebUI
 }
 
-func NewHeader(content string, level int) *Header {
-	actualLevel := 0
-	switch {
-	case level < 1:
-		actualLevel = 1
-	case level > 6:
-		actualLevel = 6
-	default:
-		actualLevel = level
-	}
-	return &Header{
-		Text:  content,
-		Level: actualLevel,
-		Tag:   fmt.Sprintf("<h%d>", actualLevel),
-	}
-}
-func (u *Header) SetID(id string) {
-	u.Tag = fmt.Sprintf("<h%d id=\"%s\">", u.Level, id)
+func (e *Element) SetID(id string) {
+	e.Attributes["id"] = id
 }
 
-func (u *Header) Render() string {
-	return fmt.Sprintf("%s%s</h%d>", u.Tag, u.Text, u.Level)
+func (e *Element) SetAttr(k, v string) {
+	e.Attributes[k] = v
 }
 
-// <p>
-type Text struct {
-	Text string
-	Tag  string
-}
-
-func NewText(content string) *Text {
-	return &Text{
-		Text: content,
-		Tag:  "<p>",
-	}
-}
-func (u *Text) SetID(id string) {
-	u.Tag = fmt.Sprintf("<p id=\"%s\">", id)
-}
-
-func (u *Text) Render() string {
-	return fmt.Sprintf("%s%s</p>", u.Tag, u.Text)
-}
-
-// <a>
-// Link is a <a>
-type Link struct {
-	Text string
-	URL  string
-	Tag  string
-}
-
-func NewLink(content string, link string) *Link {
-	return &Link{
-		Text: content,
-		URL:  link,
-		Tag:  fmt.Sprintf("<a href=\"%s\">", link),
+func (e *Element) AddChild(w ...WebUI) {
+	for _, v := range w {
+		e.Children = append(e.Children, v)
 	}
 }
 
-func (u *Link) SetID(id string) {
-	u.Tag = fmt.Sprintf("<a href=\"%s\" id=\"%s\">", u.URL, id)
+func (e *Element) Render() string {
+	attrString := ""
+	for k, v := range e.Attributes {
+		attrString += fmt.Sprintf(" %s=\"%s\"", k, v)
+	}
+	childString := ""
+	for _, v := range e.Children {
+		childString += v.Render()
+	}
+	ret := fmt.Sprintf(
+		"<%s%s>%s%s%s%s",
+		e.Tag, attrString,
+		e.Value, childString, e.ValueEnd,
+		e.EndTag,
+	)
+	return ret
 }
 
-func (u *Link) Render() string {
-	return fmt.Sprintf("%s%s</a>", u.Tag, u.Text)
-}
-
-// <button>
-// Button is a <button> with <a> inside, currently this is the only one and required
-type Button struct {
-	ID   string
-	Tag  string
-	Link *Link
-}
-
-func NewButton(l *Link) *Button {
-	return &Button{
-		Tag:  "<button>",
-		Link: l,
+func NewElement(tag, value string) *Element {
+	return &Element{
+		Tag: tag, EndTag: "</" + tag + ">",
+		Value:      value,
+		Children:   []WebUI{},
+		Attributes: map[string]string{},
 	}
 }
 
-func (u *Button) SetID(id string) {
-	u.Tag = fmt.Sprintf("<button id=\"%s\">", id)
+func NewElementWithNoEndTag(tag, value string) *Element {
+	return &Element{
+		Tag: tag, EndTag: "",
+		Value:      value,
+		Children:   []WebUI{},
+		Attributes: map[string]string{},
+	}
 }
 
-func (u *Button) Render() string {
-	return fmt.Sprintf("%s%s</button>", u.Tag, u.Link.Render())
+type GroupElement struct {
+	Elements []*Element
 }
 
-// <br>
-type BR struct {
+func NewGroupElement(e ...*Element) *GroupElement {
+	return &GroupElement{Elements: e}
 }
 
-func NewBR() *BR {
-	return &BR{}
+func (g *GroupElement) Render() string {
+	ret := ""
+	for _, v := range g.Elements {
+		ret += v.Render()
+	}
+	return ret
 }
 
-func (u *BR) Render() string {
-	return "<br>"
+func NewDiv(w ...WebUI) *Element {
+	d := NewElement("div", "")
+	d.AddChild(w...)
+	return d
+}
+
+// level should be h1,h2,h3...
+func NewHeader(content, level string) *Element {
+	return NewElement(level, content)
+}
+
+func NewText(content string) *Element {
+	return NewElement("p", content)
+}
+
+func NewLink(content string, link string) *Element {
+	e := NewElement("a", content)
+	e.SetAttr("href", link)
+	return e
+}
+
+func NewButton(content, link string) *Element {
+	e := NewElement("a", content)
+	e.SetAttr("href", link)
+	b := NewElement("button", "")
+	b.AddChild(e)
+	return b
+}
+func NewBR() *Element {
+	return NewElementWithNoEndTag("br", "")
+}
+
+func NewForm(targetURL, name string, e ...WebUI) *Element {
+	f := NewElement("form", "")
+	f.Value = fmt.Sprintf("<fieldset><legend>%s</legend>", name)
+	f.ValueEnd = "</fieldset>"
+	f.SetAttr("action", targetURL)
+	f.SetAttr("method", "post")
+	f.SetAttr("enctype", "multipart/form-data")
+	f.AddChild(e...)
+	return f
+}
+
+func NewInput(name, inputType, content, id string) *Element {
+	i := NewElementWithNoEndTag("input", "")
+	i.SetAttr("type", inputType)
+	i.SetAttr("name", name)
+	i.SetAttr("value", content)
+	i.SetAttr("id", id)
+	return i
+}
+
+func NewLabel(content string, target string) *Element {
+	l := NewElement("label", content)
+	l.SetAttr("for", target)
+	return l
+}
+
+func NewTextInput(name string) *GroupElement {
+	return NewGroupElement(
+		NewLabel(name, name),
+		NewInput(name, "text", "", name), NewBR(),
+	)
+}
+
+func NewTextInputWithValue(name, value string) *GroupElement {
+	return NewGroupElement(
+		NewLabel(name, name),
+		NewInput(name, "text", value, name), NewBR(),
+	)
+}
+
+func NewCheckBox(name string) *GroupElement {
+	return NewGroupElement(
+		NewLabel(name, name),
+		NewInput(name, "checkbox", name, name), NewBR(),
+	)
+}
+
+func NewRadioInput(name, value string) *GroupElement {
+	return NewGroupElement(
+		NewInput(name, "radio", value, name+"-"+value),
+		NewLabel(value, name+"-"+value), NewBR(),
+	)
+}
+
+func NewTable(w ...WebUI) *Element {
+	t := NewElement("table", "")
+	t.Value = "<tbody>"
+	t.ValueEnd = "</tbody>"
+	t.AddChild(w...)
+	return t
+}
+
+func NewTableRow(header bool, data ...string) *Element {
+	rowType := "td"
+	if header {
+		rowType = "th"
+	}
+	tr := NewElement("tr", "")
+	for _, v := range data {
+		th := NewElement(rowType, v)
+		tr.AddChild(th)
+	}
+	return tr
 }

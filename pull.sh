@@ -1,3 +1,4 @@
+rm -rf vendor
 mkdir -p vendor/go_utils/utils
 PACKAGE_BASE="../go_utils/utils"
 
