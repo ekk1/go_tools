@@ -15,7 +15,7 @@ type Element struct {
 }
 
 func (e *Element) SetID(id string) {
-	e.Attributes["id"] = id
+	e.SetAttr("id", id)
 }
 
 func (e *Element) SetAttr(k, v string) {

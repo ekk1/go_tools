@@ -44,5 +44,5 @@ func ServerReply(msg string, w http.ResponseWriter) {
 func ServerError(msg string, w http.ResponseWriter, r *http.Request) {
 	utils.LogPrintInfo("Got", r.Method, "from", r.RemoteAddr, "to", r.URL.Path, "Failed")
 	//w.WriteHeader(http.StatusOK)
-	w.Write([]byte("<html lang=\"en\"><body><p>" + msg + "</p>\n\n<a href=\"/\">index</a></body></html>"))
+	w.Write([]byte("<html lang=\"en\"><head><link rel=\"icon\" href=\"data:;base64,iVBORw0KGgo=\"></head><body><p>" + msg + "</p>\n\n<a href=\"/\">index</a></body></html>"))
 }
