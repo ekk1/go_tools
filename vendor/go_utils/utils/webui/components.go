@@ -2,6 +2,7 @@ package webui
 
 import (
 	"fmt"
+	"go_utils/utils"
 )
 
 type Element struct {
@@ -138,23 +139,26 @@ func NewLabel(content string, target string) *Element {
 }
 
 func NewTextInput(name string) *GroupElement {
+	idSuffix := utils.RandomString(5)
 	return NewGroupElement(
-		NewLabel(name, name),
-		NewInput(name, "text", "", name), NewBR(),
+		NewLabel(name, name+"-"+idSuffix),
+		NewInput(name, "text", "", name+"-"+idSuffix), NewBR(),
 	)
 }
 
 func NewTextInputWithValue(name, value string) *GroupElement {
+	idSuffix := utils.RandomString(5)
 	return NewGroupElement(
-		NewLabel(name, name),
-		NewInput(name, "text", value, name), NewBR(),
+		NewLabel(name, name+"-"+idSuffix),
+		NewInput(name, "text", value, name+"-"+idSuffix), NewBR(),
 	)
 }
 
 func NewCheckBox(name string) *GroupElement {
+	idSuffix := utils.RandomString(5)
 	return NewGroupElement(
-		NewLabel(name, name),
-		NewInput(name, "checkbox", name, name), NewBR(),
+		NewLabel(name, name+"-"+idSuffix),
+		NewInput(name, "checkbox", name, name+"-"+idSuffix), NewBR(),
 	)
 }
 
