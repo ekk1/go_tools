@@ -12,24 +12,55 @@ var BaseHTML string = `<!DOCTYPE html>
   <title>%s</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <style>
+  html {
+    font-family: monospace;
+    font-size: large;
+  }
   h1 {
     color: DarkMagenta;
   }
   table, th, td {
     border: 1px solid black;
+    border-collapse: collapse;
   }
   input {
     margin: 5px;
+    font-family: monospace;
   }
   th, td {
     padding: 5px;
+    border: 1px solid #ddd;
+  }
+  tr:nth-child(even) {background-color: #f2f2f2;}
+  tr:hover {background-color: #ddd;}
+  th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
   }
   div {
     margin: 10px;
     margin-top: 20px;
   }
-  button {
+  .btn {
     margin: 5px;
+    font-family: monospace;
+    background-color: rgba(0,0,0,0);
+    border-color: #04AA6D;
+    color: black;
+    border: 2px solid;
+    padding: 8px 16px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+  .btn:hover {
+    background-color: #04AA6D;
+    color: white;
   }
   </style>
 </head>

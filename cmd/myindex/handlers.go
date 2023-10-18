@@ -5,6 +5,7 @@ import (
 	"go_utils/utils/myhttp"
 	"go_utils/utils/webui"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -44,10 +45,11 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		folderDiv := webui.NewDiv(
 			webui.NewHeader(k, "h3"),
 		)
+		sort.Strings(v)
 		for _, name := range v {
-			folderDiv.AddChild(webui.NewLink(
-				name, kv.Get("LINK::"+k+"::"+name),
-			), webui.NewBR())
+			li := webui.NewLink(name, kv.Get("LINK::"+k+"::"+name))
+			li.SetAttr("target", "_blank")
+			folderDiv.AddChild(li, webui.NewBR())
 		}
 		infoDiv.AddChild(folderDiv)
 	}

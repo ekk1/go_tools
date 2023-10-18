@@ -15,7 +15,7 @@ var kv *minikv.KV
 func main() {
 	var verboseFlag = flag.Int("v", 0, "debug (max 4)")
 	var listenAddr = flag.String("l", "127.0.0.1", "listen address")
-	var listenPort = flag.String("p", "8888", "listen port")
+	var listenPort = flag.String("p", "9900", "listen port")
 	flag.Parse()
 
 	kvv, err := minikv.NewKV("ss", 0)

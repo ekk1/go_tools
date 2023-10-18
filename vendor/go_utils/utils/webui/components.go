@@ -18,6 +18,10 @@ func (e *Element) SetID(id string) {
 	e.SetAttr("id", id)
 }
 
+func (e *Element) SetClass(class string) {
+	e.SetAttr("class", class)
+}
+
 func (e *Element) SetAttr(k, v string) {
 	e.Attributes[k] = v
 }
