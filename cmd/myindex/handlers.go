@@ -29,6 +29,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		webui.NewForm("/", "Add",
 			webui.NewTextInput("name"),
 			webui.NewTextInputWithValue("url", "https://"),
+			webui.NewTextInputWithValue("folder", "default"),
 			submitBtn,
 		),
 	)
