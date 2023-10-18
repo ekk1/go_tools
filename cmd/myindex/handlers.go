@@ -5,6 +5,7 @@ import (
 	"go_utils/utils/myhttp"
 	"go_utils/utils/webui"
 	"net/http"
+	"slices"
 	"sort"
 	"strings"
 )
@@ -15,22 +16,26 @@ var (
 
 func renderPage(w http.ResponseWriter, req *http.Request) {
 	base := webui.NewBase("myindex")
+	refreshBtn := webui.NewLink("Refresh", "/")
+	refreshBtn.SetClass("btn")
 	headDiv := webui.NewDiv(
 		webui.NewHeader("Index", "h1"),
-		webui.NewButton("Refresh", "/"),
+		refreshBtn,
 	)
 
+	submitBtn := webui.NewInput("submit", "submit", "submit", "submit")
+	submitBtn.SetClass("btn")
 	submitDiv := webui.NewDiv(
 		webui.NewForm("/", "Add",
 			webui.NewTextInput("name"),
 			webui.NewTextInputWithValue("url", "https://"),
-			webui.NewTextInputWithValue("folder", "default"),
-			webui.NewInput("submit", "submit", "submit", "submit"),
+			submitBtn,
 		),
 	)
 
 	links := kv.Keys("LINK::")
 	linkDict := map[string][]string{}
+	dictKeys := []string{}
 	for _, v := range links {
 		fields := strings.Split(v, "::")
 		if _, ok := linkDict[fields[1]]; !ok {
@@ -39,16 +44,21 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		linkDict[fields[1]] = append(
 			linkDict[fields[1]], fields[2],
 		)
+		if !slices.Contains(dictKeys, fields[1]) {
+			dictKeys = append(dictKeys, fields[1])
+		}
 	}
+	sort.Strings(dictKeys)
 	infoDiv := webui.NewDiv()
-	for k, v := range linkDict {
+	for _, v := range dictKeys {
 		folderDiv := webui.NewDiv(
-			webui.NewHeader(k, "h3"),
+			webui.NewHeader(v, "h3"),
 		)
-		sort.Strings(v)
-		for _, name := range v {
-			li := webui.NewLink(name, kv.Get("LINK::"+k+"::"+name))
+		sort.Strings(linkDict[v])
+		for _, name := range linkDict[v] {
+			li := webui.NewLink(name, kv.Get("LINK::"+v+"::"+name))
 			li.SetAttr("target", "_blank")
+			li.SetClass("btn")
 			folderDiv.AddChild(li, webui.NewBR())
 		}
 		infoDiv.AddChild(folderDiv)
