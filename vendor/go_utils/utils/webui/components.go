@@ -105,6 +105,13 @@ func NewLink(content string, link string) *Element {
 	return e
 }
 
+func NewLinkBtn(content string, link string) *Element {
+	e := NewElement("a", content)
+	e.SetAttr("href", link)
+	e.SetClass("btn")
+	return e
+}
+
 func NewButton(content, link string) *Element {
 	e := NewElement("a", content)
 	e.SetAttr("href", link)
@@ -134,6 +141,12 @@ func NewInput(name, inputType, content, id string) *Element {
 	i.SetAttr("value", content)
 	i.SetAttr("id", id)
 	return i
+}
+
+func NewSubmitBtn(name string, id string) *GroupElement {
+	s := NewInput(name, "submit", name, id)
+	s.SetClass("btn")
+	return NewGroupElement(s, NewBR())
 }
 
 func NewLabel(content string, target string) *Element {
