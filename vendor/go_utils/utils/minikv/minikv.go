@@ -48,7 +48,7 @@ func NewKV(name string, limit int64) (*KV, error) {
 
 func MustNewKV(name string, limit int64) *KV {
 	kv, err := NewKV(name, limit)
-	utils.ErrExit(err, 1)
+	utils.ErrExit(err)
 	return kv
 }
 
@@ -125,10 +125,10 @@ func (kv *KV) MustLoad() {
 	if errors.Is(err, os.ErrNotExist) {
 		utils.LogPrintWarning("DB not exists, creating...")
 		err2 := kv.Save()
-		utils.ErrExit(err2, 2)
+		utils.ErrExit(err2)
 		return
 	}
-	utils.ErrExit(err, 2)
+	utils.ErrExit(err)
 }
 
 func (kv *KV) DumpJSON() (string, error) {

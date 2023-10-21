@@ -18,6 +18,8 @@ func main() {
 	kv = minikv.MustNewKV("ss", 0)
 	kv.MustLoad()
 
+	LoadClashRules()
+
 	utils.SetLogLevelByVerboseFlag(*verboseFlag)
 
 	ss := myhttp.NewServer("cc", *listenAddr, *listenPort)

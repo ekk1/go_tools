@@ -6,6 +6,7 @@ import (
 	"go_utils/utils"
 	"go_utils/utils/myhttp"
 	"net/http"
+	"slices"
 	"time"
 )
 
@@ -59,6 +60,8 @@ func LoadSingleSubscribe(name string) *Subscribe {
 
 func LoadSubscribe() []*Subscribe {
 	ssKeys := kv.Keys(ssPrefix)
+	slices.Sort(ssKeys)
+	slices.Reverse(ssKeys)
 	ret := []*Subscribe{}
 	for _, v := range ssKeys {
 		ss := LoadSingleSubscribe(v)
