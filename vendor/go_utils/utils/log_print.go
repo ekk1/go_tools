@@ -18,6 +18,21 @@ const (
 
 var LogLevel = LOG_LEVEL_INFO
 
+func SetLogLevelByVerboseFlag(flag int) {
+	switch {
+	case flag == 0:
+		SetLogLevelInfo()
+	case flag == 1:
+		SetLogLevelDebug()
+	case flag == 2:
+		SetLogLevelDebug2()
+	case flag == 3:
+		SetLogLevelDebug3()
+	case flag >= 4:
+		SetLogLevelDebug4()
+	}
+}
+
 func LogPrintDebug(a ...any) {
 	if LogLevel >= LOG_LEVEL_DEBUG {
 		t := time.Now().Format("2006-01-02 15:04:05.000")
@@ -75,23 +90,29 @@ func LogPrintError(a ...any) {
 }
 
 func SetLogLevelDebug() {
+	LogPrintInfo("Setting log level debug")
 	LogLevel = LOG_LEVEL_DEBUG
 }
 func SetLogLevelDebug2() {
+	LogPrintInfo("Setting log level debug2")
 	LogLevel = LOG_LEVEL_DEBUG2
 }
 func SetLogLevelDebug3() {
+	LogPrintInfo("Setting log level debug3")
 	LogLevel = LOG_LEVEL_DEBUG3
 }
 func SetLogLevelDebug4() {
+	LogPrintInfo("Setting log level debug4")
 	LogLevel = LOG_LEVEL_DEBUG4
 }
 func SetLogLevelInfo() {
 	LogLevel = LOG_LEVEL_INFO
 }
 func SetLogLevelWarning() {
+	LogPrintInfo("Setting log level warning")
 	LogLevel = LOG_LEVEL_WARNING
 }
 func SetLogLevelError() {
+	LogPrintInfo("Setting log level error")
 	LogLevel = LOG_LEVEL_ERROR
 }

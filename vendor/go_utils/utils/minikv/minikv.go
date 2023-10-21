@@ -3,6 +3,7 @@ package minikv
 import (
 	"encoding/json"
 	"errors"
+	"go_utils/utils"
 	"os"
 	"strings"
 	"sync"
@@ -43,6 +44,12 @@ func NewKV(name string, limit int64) (*KV, error) {
 		lock:  sync.Mutex{},
 	}
 	return kv, nil
+}
+
+func MustNewKV(name string, limit int64) *KV {
+	kv, err := NewKV(name, limit)
+	utils.ErrExit(err, 1)
+	return kv
 }
 
 func (kv *KV) Get(key string) string {
@@ -111,6 +118,17 @@ func (kv *KV) Load() error {
 		return err
 	}
 	return json.Unmarshal(data, &kv.kvs)
+}
+
+func (kv *KV) MustLoad() {
+	err := kv.Load()
+	if errors.Is(err, os.ErrNotExist) {
+		utils.LogPrintWarning("DB not exists, creating...")
+		err2 := kv.Save()
+		utils.ErrExit(err2, 2)
+		return
+	}
+	utils.ErrExit(err, 2)
 }
 
 func (kv *KV) DumpJSON() (string, error) {

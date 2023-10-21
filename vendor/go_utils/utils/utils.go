@@ -5,10 +5,10 @@ import (
 	"os"
 )
 
-func ErrExit(err error) {
+func ErrExit(err error, rc int) {
 	if err != nil {
 		LogPrintError(err)
-		os.Exit(1)
+		os.Exit(rc)
 	}
 }
 
