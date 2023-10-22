@@ -40,7 +40,7 @@ func ServerLog(caller string, r *http.Request) {
 
 func ServerReply(msg string, w http.ResponseWriter) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(msg))
+	w.Write([]byte("<html lang=\"en\"><head><link rel=\"icon\" href=\"data:;base64,iVBORw0KGgo=\"></head><body><p>" + msg + "</p>\n\n<a href=\"/\">index</a></body></html>"))
 }
 
 func ServerError(msg string, w http.ResponseWriter, r *http.Request) {

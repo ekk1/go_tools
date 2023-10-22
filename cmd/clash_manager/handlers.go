@@ -5,6 +5,7 @@ import (
 	"go_utils/utils/myhttp"
 	"go_utils/utils/webui"
 	"net/http"
+	"os"
 	"slices"
 )
 
@@ -40,6 +41,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		webui.NewHeader("Clash Manager", "h1"),
 		webui.NewText("A simple manager"),
 		webui.NewLinkBtn("Refresh", "/"),
+		webui.NewLinkBtn("Generate", "/gen"),
 	))
 	infoTable := webui.NewTable(
 		webui.NewTableRow(true, "Name", "Last", "", ""),
@@ -52,12 +54,29 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		))
 	}
 	base.AddChild(webui.NewDiv(infoTable))
+
 	base.AddChild(webui.NewDiv(webui.NewForm(
 		"/", "Add sub",
 		webui.NewTextInputWithValue("name", "ss"),
 		webui.NewTextInputWithValue("url", "https://"),
-		webui.NewSubmitBtn("add", "submit"),
+		webui.NewSubmitBtn("Add", "submit"),
 	)))
+	base.AddChild(webui.NewDiv(webui.NewForm(
+		"/rules", "Add rules",
+		webui.NewTextInputWithValue("rule", "DOMAIN-SUFFIX,xxx.com,DIRECT"),
+		webui.NewSubmitBtn("Add", "submit2"),
+	)))
+
+	rulesTable := webui.NewTable(
+		webui.NewTableRow(true,
+			"Rules", "",
+		),
+	)
+	for _, p := range ClashRules {
+		rulesTable.AddChild(webui.NewTableRow(false,
+			p, webui.NewLink("Delete", "/deleterule?name="+p).Render(),
+		))
+	}
 
 	proxyTable := webui.NewTable(
 		webui.NewTableRow(true,
@@ -82,6 +101,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	base.AddChild(
+		webui.NewDiv(rulesTable),
 		webui.NewDiv(proxyTable),
 		webui.NewDiv(nodeTable),
 		webui.NewDiv(webui.NewText(pageMsg)),
@@ -91,12 +111,34 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(base.Render()))
 }
 
+func handleAddRules(w http.ResponseWriter, req *http.Request) {
+	if req.Method != http.MethodPost {
+		myhttp.ServerError("method not post", w, req)
+		return
+	}
+	ssRule := req.FormValue("rule")
+	AddClashRules(ssRule)
+	renderPage(w, req)
+}
+
+func handleDeleteRules(w http.ResponseWriter, req *http.Request) {
+	ppName := req.URL.Query().Get("name")
+	if slices.Contains(ClashRules, ppName) {
+		DeleteClashRules(ppName)
+	} else {
+		myhttp.ServerError("No rule named: "+ppName, w, req)
+		return
+	}
+	renderPage(w, req)
+}
+
 func handleSelectProxy(w http.ResponseWriter, req *http.Request) {
 	ppName := req.URL.Query().Get("name")
 	if slices.Contains(AllProxies, ppName) {
 		CurrentProxy = ppName
 	} else {
 		myhttp.ServerError("No proxy named "+ppName, w, req)
+		return
 	}
 	renderPage(w, req)
 }
@@ -109,9 +151,11 @@ func handleSelectNode(w http.ResponseWriter, req *http.Request) {
 		if err != nil {
 			utils.LogPrintError(err)
 			myhttp.ServerError("Failed to select node", w, req)
+			return
 		}
 	} else {
 		myhttp.ServerError("No proxy named "+ppName, w, req)
+		return
 	}
 	renderPage(w, req)
 }
@@ -167,4 +211,13 @@ func handleRoot(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	renderPage(w, req)
+}
+
+func handleGenerateYaml(w http.ResponseWriter, req *http.Request) {
+	ret := RenderClashYaml(LoadSubscribe())
+	err := os.WriteFile(clashYamlOutPath, []byte(ret), 0600)
+	if err != nil {
+		myhttp.ServerError("Failed to write yaml", w, req)
+	}
+	myhttp.ServerReply("Written", w)
 }

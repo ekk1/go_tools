@@ -50,7 +50,7 @@ func AddClashRules(rule string) {
 
 func DeleteClashRules(rule string) {
 	i := slices.Index(ClashRules, rule)
-	ClashRules = slices.Delete(ClashRules, i, i)
+	ClashRules = slices.Delete(ClashRules, i, i+1)
 	SaveClashRules()
 }
 
