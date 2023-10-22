@@ -194,21 +194,23 @@ func handleDelete(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleRoot(w http.ResponseWriter, req *http.Request) {
-	if req.Method == http.MethodPost {
-		ssName := req.FormValue("name")
-		ssURL := req.FormValue("url")
-		utils.LogPrintInfo("Got sub:", ssName)
-		if !myhttp.ServerCheckParam(ssName, ssURL) {
-			myhttp.ServerError("Field can not be empty", w, req)
-			return
-		}
-		ss := &Subscribe{
-			Name: ssName,
-			URL:  ssURL,
-		}
-		if !onlineSaveSS(ss, req, w) {
-			return
-		}
+	if req.Method != http.MethodPost {
+		myhttp.ServerError("method not post", w, req)
+		return
+	}
+	ssName := req.FormValue("name")
+	ssURL := req.FormValue("url")
+	utils.LogPrintInfo("Got sub:", ssName)
+	if !myhttp.ServerCheckParam(ssName, ssURL) {
+		myhttp.ServerError("Field can not be empty", w, req)
+		return
+	}
+	ss := &Subscribe{
+		Name: ssName,
+		URL:  ssURL,
+	}
+	if !onlineSaveSS(ss, req, w) {
+		return
 	}
 	renderPage(w, req)
 }
