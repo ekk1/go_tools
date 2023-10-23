@@ -90,6 +90,13 @@ func NewDiv(w ...WebUI) *Element {
 	return d
 }
 
+func NewColumnDiv(w ...WebUI) *Element {
+	d := NewElement("div", "")
+	d.SetClass("ccdiv")
+	d.AddChild(w...)
+	return d
+}
+
 // level should be h1,h2,h3...
 func NewHeader(content, level string) *Element {
 	return NewElement(level, content)

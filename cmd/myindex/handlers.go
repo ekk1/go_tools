@@ -14,29 +14,11 @@ var (
 	pageMsg string
 )
 
-func renderPage(w http.ResponseWriter, req *http.Request) {
-	base := webui.NewBase("myindex")
-	refreshBtn := webui.NewLink("Refresh", "/")
-	refreshBtn.SetClass("btn")
-	headDiv := webui.NewDiv(
-		webui.NewHeader("Index", "h1"),
-		refreshBtn,
-	)
-
-	submitBtn := webui.NewInput("submit", "submit", "submit", "submit")
-	submitBtn.SetClass("btn")
-	submitDiv := webui.NewDiv(
-		webui.NewForm("/", "Add",
-			webui.NewTextInput("name"),
-			webui.NewTextInputWithValue("url", "https://"),
-			webui.NewTextInputWithValue("folder", "default"),
-			submitBtn,
-		),
-	)
-
+func prepareLinksData() ([]string, map[string][]string) {
 	links := kv.Keys("LINK::")
 	linkDict := map[string][]string{}
 	dictKeys := []string{}
+
 	for _, v := range links {
 		fields := strings.Split(v, "::")
 		if _, ok := linkDict[fields[1]]; !ok {
@@ -49,7 +31,46 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 			dictKeys = append(dictKeys, fields[1])
 		}
 	}
+
 	sort.Strings(dictKeys)
+	return dictKeys, linkDict
+}
+
+func renderPage(w http.ResponseWriter, req *http.Request) {
+	base := webui.NewBase("myindex")
+
+	headDiv := webui.NewDiv(
+		webui.NewHeader("Index", "h1"),
+		webui.NewLinkBtn("Refresh", "/"),
+	)
+
+	submitDiv := webui.NewDiv(
+		webui.NewForm("/add", "Add & Update",
+			webui.NewTextInput("name"),
+			webui.NewTextInputWithValue("url", "https://"),
+			webui.NewTextInputWithValue("folder", "default"),
+			webui.NewSubmitBtn("submit", "submit1"),
+		),
+	)
+
+	deleteDiv := webui.NewDiv(
+		webui.NewForm("/delete", "Delete",
+			webui.NewTextInput("name"),
+			webui.NewTextInputWithValue("folder", "default"),
+			webui.NewSubmitBtn("delete", "submit2"),
+		),
+	)
+
+	moveDiv := webui.NewDiv(
+		webui.NewForm("/move", "Move",
+			webui.NewTextInput("name"),
+			webui.NewTextInputWithValue("old_folder", "default"),
+			webui.NewTextInputWithValue("new_folder", "default"),
+			webui.NewSubmitBtn("move", "submit3"),
+		),
+	)
+
+	dictKeys, linkDict := prepareLinksData()
 	infoDiv := webui.NewDiv()
 	for _, v := range dictKeys {
 		folderDiv := webui.NewDiv(
@@ -57,40 +78,74 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		)
 		sort.Strings(linkDict[v])
 		for _, name := range linkDict[v] {
-			li := webui.NewLink(name, kv.Get("LINK::"+v+"::"+name))
+			li := webui.NewLinkBtn(name, kv.Get("LINK::"+v+"::"+name))
 			li.SetAttr("target", "_blank")
-			li.SetClass("btn")
-			folderDiv.AddChild(li, webui.NewBR())
+			folderDiv.AddChild(li)
 		}
 		infoDiv.AddChild(folderDiv)
 	}
 
-	base.AddChild(headDiv, submitDiv, infoDiv)
+	formDiv := webui.NewColumnDiv(submitDiv, deleteDiv, moveDiv, webui.NewDiv())
+	base.AddChild(headDiv, formDiv, infoDiv)
 
 	w.Write([]byte(base.Render()))
 }
 
 func handleRoot(w http.ResponseWriter, req *http.Request) {
-	myhttp.ServerLog("root", req)
-	if !myhttp.ServerCheckPath("/", req, w) {
+	renderPage(w, req)
+}
+
+func handleAdd(w http.ResponseWriter, req *http.Request) {
+	linkName := req.FormValue("name")
+	linkURL := req.FormValue("url")
+	linkFolder := req.FormValue("folder")
+	utils.LogPrintInfo("Got link:", linkName, linkURL, linkFolder)
+	if !myhttp.ServerCheckParam(linkName, linkURL, linkFolder) {
+		myhttp.ServerError("Field can not be empty", w, req)
 		return
 	}
+	kKey := "LINK::" + linkFolder + "::" + linkName
+	kv.Set(kKey, linkURL)
+	if err := kv.Save(); err != nil {
+		myhttp.ServerError("Failed to save DB", w, req)
+		return
+	}
+	renderPage(w, req)
+}
 
-	if req.Method == http.MethodPost {
-		linkName := req.FormValue("name")
-		linkURL := req.FormValue("url")
-		linkFolder := req.FormValue("folder")
-		utils.LogPrintInfo("Got link:", linkName, linkURL, linkFolder)
-		if !myhttp.ServerCheckParam(linkName, linkURL, linkFolder) {
-			myhttp.ServerError("Field can not be empty", w, req)
-			return
-		}
-		kKey := "LINK::" + linkFolder + "::" + linkName
-		kv.Set(kKey, linkURL)
-		if err := kv.Save(); err != nil {
-			myhttp.ServerError("Failed to save DB", w, req)
-			return
-		}
+func handleDelete(w http.ResponseWriter, req *http.Request) {
+	linkName := req.FormValue("name")
+	linkFolder := req.FormValue("folder")
+	utils.LogPrintInfo("Delete link:", linkName, linkFolder)
+	if !myhttp.ServerCheckParam(linkName, linkFolder) {
+		myhttp.ServerError("Field can not be empty", w, req)
+		return
+	}
+	kKey := "LINK::" + linkFolder + "::" + linkName
+	kv.Delete(kKey)
+	if err := kv.Save(); err != nil {
+		myhttp.ServerError("Failed to save DB", w, req)
+		return
+	}
+	renderPage(w, req)
+}
+
+func handleMove(w http.ResponseWriter, req *http.Request) {
+	linkName := req.FormValue("name")
+	linkOldFolder := req.FormValue("old_folder")
+	linkNewFolder := req.FormValue("new_folder")
+	utils.LogPrintInfo("Move link:", linkName, linkOldFolder, linkNewFolder)
+	if !myhttp.ServerCheckParam(linkName, linkOldFolder, linkNewFolder) {
+		myhttp.ServerError("Field can not be empty", w, req)
+		return
+	}
+	kKey := "LINK::" + linkOldFolder + "::" + linkName
+	kKeyNew := "LINK::" + linkNewFolder + "::" + linkName
+	kv.Set(kKeyNew, kv.Get(kKey))
+	kv.Delete(kKey)
+	if err := kv.Save(); err != nil {
+		myhttp.ServerError("Failed to save DB", w, req)
+		return
 	}
 	renderPage(w, req)
 }

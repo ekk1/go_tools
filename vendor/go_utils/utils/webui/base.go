@@ -16,6 +16,9 @@ var BaseHTML string = `<!DOCTYPE html>
     font-family: monospace;
     font-size: large;
   }
+  * {
+    box-sizing: border-box;
+  }
   h1 {
     color: DarkMagenta;
   }
@@ -41,8 +44,7 @@ var BaseHTML string = `<!DOCTYPE html>
     color: white;
   }
   div {
-    margin: 10px;
-    margin-top: 20px;
+    padding: 10px;
   }
   .btn {
     margin: 5px;
@@ -61,6 +63,16 @@ var BaseHTML string = `<!DOCTYPE html>
   .btn:hover {
     background-color: #04AA6D;
     color: white;
+  }
+  .ccdiv {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+  }
+  @media screen and (max-width: 800px) {
+    .ccdiv {
+      display: grid;
+      grid-template-columns: auto;
+    }
   }
   </style>
 </head>
