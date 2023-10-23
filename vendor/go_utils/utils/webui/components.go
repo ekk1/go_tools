@@ -147,6 +147,7 @@ func NewInput(name, inputType, content, id string) *Element {
 	i.SetAttr("name", name)
 	i.SetAttr("value", content)
 	i.SetAttr("id", id)
+	i.SetAttr("autocomplete", "off")
 	return i
 }
 

@@ -64,6 +64,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	moveDiv := webui.NewDiv(
 		webui.NewForm("/move", "Move",
 			webui.NewTextInput("name"),
+			webui.NewTextInput("name_new"),
 			webui.NewTextInputWithValue("old_folder", "default"),
 			webui.NewTextInputWithValue("new_folder", "default"),
 			webui.NewSubmitBtn("move", "submit3"),
@@ -132,15 +133,20 @@ func handleDelete(w http.ResponseWriter, req *http.Request) {
 
 func handleMove(w http.ResponseWriter, req *http.Request) {
 	linkName := req.FormValue("name")
+	linkNewName := req.FormValue("name_new")
 	linkOldFolder := req.FormValue("old_folder")
 	linkNewFolder := req.FormValue("new_folder")
-	utils.LogPrintInfo("Move link:", linkName, linkOldFolder, linkNewFolder)
-	if !myhttp.ServerCheckParam(linkName, linkOldFolder, linkNewFolder) {
+	utils.LogPrintInfo("Move link:", linkName, linkNewName, linkOldFolder, linkNewFolder)
+	if !myhttp.ServerCheckParam(linkName, linkNewName, linkOldFolder, linkNewFolder) {
 		myhttp.ServerError("Field can not be empty", w, req)
 		return
 	}
 	kKey := "LINK::" + linkOldFolder + "::" + linkName
-	kKeyNew := "LINK::" + linkNewFolder + "::" + linkName
+	if !kv.Exists(kKey) {
+		myhttp.ServerError("Not exists", w, req)
+		return
+	}
+	kKeyNew := "LINK::" + linkNewFolder + "::" + linkNewName
 	kv.Set(kKeyNew, kv.Get(kKey))
 	kv.Delete(kKey)
 	if err := kv.Save(); err != nil {
