@@ -5,6 +5,7 @@ import (
 	"go_utils/utils"
 	"net/http"
 	"slices"
+	"strings"
 	"sync"
 )
 
@@ -44,20 +45,20 @@ func ServerReply(msg string, w http.ResponseWriter) {
 }
 
 func ServerError(msg string, w http.ResponseWriter, r *http.Request) {
-	utils.LogPrintInfo("Got", r.Method, "from", r.RemoteAddr, "to", r.URL.Path, "Failed")
+	utils.LogPrintError("Got", r.Method, "from", r.RemoteAddr, "to", r.URL.Path, "Failed")
 	//w.WriteHeader(http.StatusOK)
 	w.Write([]byte("<html lang=\"en\"><head><link rel=\"icon\" href=\"data:;base64,iVBORw0KGgo=\"></head><body><p>" + msg + "</p>\n\n<a href=\"/\">index</a></body></html>"))
 }
 
-func HandlerMaker(method, path string, h http.HandlerFunc) (string, http.HandlerFunc) {
+func HandlerMaker(method []string, path string, h http.HandlerFunc) (string, http.HandlerFunc) {
 	return path, func(ww http.ResponseWriter, rr *http.Request) {
 		ServerLog(path, rr)
 		if !ServerCheckPath(path, rr, ww) {
 			ServerError("Path error", ww, rr)
 			return
 		}
-		if rr.Method != method {
-			ServerError("Expect "+method+" but got: "+rr.Method, ww, rr)
+		if !slices.Contains(method, rr.Method) {
+			ServerError("Expect "+strings.Join(method, ",")+" but got: "+rr.Method, ww, rr)
 			return
 		}
 		h(ww, rr)

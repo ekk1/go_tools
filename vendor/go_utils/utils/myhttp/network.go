@@ -58,6 +58,19 @@ func countTrue(args ...bool) int64 {
 	return ret
 }
 
+func (h *HTTPClient) SendGet(sendUrl string, body interface{}) (*HTTPResponse, error) {
+	return h.SendReq(http.MethodGet, sendUrl, body)
+}
+func (h *HTTPClient) SendPost(sendUrl string, body interface{}) (*HTTPResponse, error) {
+	return h.SendReq(http.MethodPost, sendUrl, body)
+}
+func (h *HTTPClient) SendPut(sendUrl string, body interface{}) (*HTTPResponse, error) {
+	return h.SendReq(http.MethodPut, sendUrl, body)
+}
+func (h *HTTPClient) SendDelete(sendUrl string, body interface{}) (*HTTPResponse, error) {
+	return h.SendReq(http.MethodDelete, sendUrl, body)
+}
+
 func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPResponse, error) {
 	if countTrue(h.json, h.form, h.rawSend) > 1 {
 		return nil, errors.New("can not use multiple body types")

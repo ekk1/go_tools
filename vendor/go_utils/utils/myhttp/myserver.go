@@ -22,12 +22,16 @@ func NewServer(name, addr, port string) *MiniServer {
 	}
 }
 
+func (s *MiniServer) AddRoute(path string, method []string, h http.HandlerFunc) {
+	s.mux.HandleFunc(HandlerMaker(method, path, h))
+}
+
 func (s *MiniServer) AddGet(path string, h http.HandlerFunc) {
-	s.mux.HandleFunc(HandlerMaker(http.MethodGet, path, h))
+	s.mux.HandleFunc(HandlerMaker([]string{http.MethodGet}, path, h))
 }
 
 func (s *MiniServer) AddPost(path string, h http.HandlerFunc) {
-	s.mux.HandleFunc(HandlerMaker(http.MethodPost, path, h))
+	s.mux.HandleFunc(HandlerMaker([]string{http.MethodPost}, path, h))
 }
 
 func (s *MiniServer) Serve() {
