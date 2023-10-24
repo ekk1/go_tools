@@ -91,9 +91,20 @@ func NewDiv(w ...WebUI) *Element {
 }
 
 func NewColumnDiv(w ...WebUI) *Element {
-	d := NewElement("div", "")
+	d := NewDiv(w...)
 	d.SetClass("ccdiv")
-	d.AddChild(w...)
+	return d
+}
+
+func NewDiv2C(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-2")
+	return d
+}
+
+func NewDiv3C(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-3")
 	return d
 }
 

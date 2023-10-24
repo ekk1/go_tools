@@ -6,7 +6,10 @@ import (
 	"go_utils/utils/webui"
 	"net/http"
 	"os"
+	"os/exec"
 	"slices"
+	"sync"
+	"syscall"
 )
 
 var (
@@ -15,7 +18,63 @@ var (
 	AllProxies   []string = []string{"p2", "p3"}
 	CurrentNode  string
 	AllNodes     []string
+	procChan     chan int = make(chan int)
+	procSync              = &struct {
+		state bool
+		lock  sync.Mutex
+	}{
+		state: false,
+	}
 )
+
+func handleRunCmd(w http.ResponseWriter, req *http.Request) {
+	procSync.lock.Lock()
+	defer procSync.lock.Unlock()
+	if procSync.state {
+		myhttp.ServerError("Already start?", w, req)
+		return
+	}
+	go func() {
+		c := exec.Command("bash", "-c", clashBinary+" -d "+clashConfigDir)
+		c.Stdout = os.Stdout
+		c.Stderr = os.Stderr
+		err := c.Start()
+		if err != nil {
+			utils.LogPrintError(err)
+		}
+		utils.LogPrintInfo("stared process")
+		procSync.lock.Lock()
+		procSync.state = true
+		procSync.lock.Unlock()
+		<-procChan
+		utils.LogPrintWarning("Killing process")
+		err = c.Process.Signal(syscall.SIGTERM)
+		if err != nil {
+			utils.LogPrintError("Failed send SIGTERM")
+			utils.LogPrintError(err)
+		}
+		err = c.Wait()
+		if err != nil {
+			utils.LogPrintError("Failed wait, should be normal")
+			utils.LogPrintError(err)
+		}
+		procSync.lock.Lock()
+		procSync.state = false
+		procSync.lock.Unlock()
+	}()
+	renderPage(w, req)
+}
+
+func handleTerminate(w http.ResponseWriter, req *http.Request) {
+	procSync.lock.Lock()
+	defer procSync.lock.Unlock()
+	if !procSync.state {
+		myhttp.ServerError("not start?", w, req)
+		return
+	}
+	procChan <- 0
+	renderPage(w, req)
+}
 
 func onlineSaveSS(ss *Subscribe, req *http.Request, w http.ResponseWriter) bool {
 	if err := ss.Save(); err != nil {
@@ -30,8 +89,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	allNodes, nowNode, err := GetNodesByProxy(CurrentProxy)
 	if err != nil {
 		utils.LogPrintError(err)
-		myhttp.ServerError("Failed get nodes", w, req)
-		return
+		pageMsg = "Failed to get Nodes"
 	}
 	CurrentNode = nowNode
 	AllNodes = allNodes
@@ -42,6 +100,8 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		webui.NewText("A simple manager"),
 		webui.NewLinkBtn("Refresh", "/"),
 		webui.NewLinkBtn("Generate", "/gen"),
+		webui.NewLinkBtn("Start", "/start"),
+		webui.NewLinkBtn("Stop", "/stop"),
 	))
 	infoTable := webui.NewTable(
 		webui.NewTableRow(true, "Name", "Last", "", ""),
@@ -55,17 +115,19 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	}
 	base.AddChild(webui.NewDiv(infoTable))
 
-	base.AddChild(webui.NewDiv(webui.NewForm(
-		"/", "Add sub",
-		webui.NewTextInputWithValue("name", "ss"),
-		webui.NewTextInputWithValue("url", "https://"),
-		webui.NewSubmitBtn("Add", "submit"),
-	)))
-	base.AddChild(webui.NewDiv(webui.NewForm(
-		"/rules", "Add rules",
-		webui.NewTextInputWithValue("rule", "DOMAIN-SUFFIX,xxx.com,DIRECT"),
-		webui.NewSubmitBtn("Add", "submit2"),
-	)))
+	base.AddChild(webui.NewColumnDiv(
+		webui.NewDiv(webui.NewForm(
+			"/add", "Add sub",
+			webui.NewTextInputWithValue("name", "ss"),
+			webui.NewTextInputWithValue("url", "https://"),
+			webui.NewSubmitBtn("Add", "submit"),
+		)),
+		webui.NewDiv(webui.NewForm(
+			"/rules", "Add rules",
+			webui.NewTextInputWithValue("rule", "DOMAIN-SUFFIX,xxx.com,DIRECT"),
+			webui.NewSubmitBtn("Add", "submit2"),
+		)),
+	))
 
 	rulesTable := webui.NewTable(
 		webui.NewTableRow(true,
@@ -100,22 +162,18 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		))
 	}
 
-	base.AddChild(
+	base.AddChild(webui.NewColumnDiv(
+		webui.NewDiv2C(nodeTable),
 		webui.NewDiv(rulesTable),
 		webui.NewDiv(proxyTable),
-		webui.NewDiv(nodeTable),
-		webui.NewDiv(webui.NewText(pageMsg)),
-	)
+	))
 
+	base.AddChild(webui.NewDiv(webui.NewText(pageMsg)))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(base.Render()))
 }
 
 func handleAddRules(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		myhttp.ServerError("method not post", w, req)
-		return
-	}
 	ssRule := req.FormValue("rule")
 	AddClashRules(ssRule)
 	renderPage(w, req)
@@ -193,11 +251,7 @@ func handleDelete(w http.ResponseWriter, req *http.Request) {
 	renderPage(w, req)
 }
 
-func handleRoot(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		myhttp.ServerError("method not post", w, req)
-		return
-	}
+func handleAddSub(w http.ResponseWriter, req *http.Request) {
 	ssName := req.FormValue("name")
 	ssURL := req.FormValue("url")
 	utils.LogPrintInfo("Got sub:", ssName)
@@ -215,11 +269,16 @@ func handleRoot(w http.ResponseWriter, req *http.Request) {
 	renderPage(w, req)
 }
 
+func handleRoot(w http.ResponseWriter, req *http.Request) {
+	renderPage(w, req)
+}
+
 func handleGenerateYaml(w http.ResponseWriter, req *http.Request) {
 	ret := RenderClashYaml(LoadSubscribe())
 	err := os.WriteFile(clashYamlOutPath, []byte(ret), 0600)
 	if err != nil {
 		myhttp.ServerError("Failed to write yaml", w, req)
+		return
 	}
 	myhttp.ServerReply("Written", w)
 }

@@ -70,9 +70,15 @@ var BaseHTML string = `<!DOCTYPE html>
   }
   @media screen and (max-width: 800px) {
     .ccdiv {
-      display: grid;
+      display: content;
       grid-template-columns: auto;
     }
+  }
+  .div-2 {
+      grid-column: span 2;
+  }
+  .div-3 {
+      grid-column: span 3;
   }
   </style>
 </head>
