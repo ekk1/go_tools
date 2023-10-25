@@ -116,13 +116,13 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	base.AddChild(webui.NewDiv(infoTable))
 
 	base.AddChild(webui.NewColumnDiv(
-		webui.NewDiv(webui.NewForm(
+		webui.NewDiv3C(webui.NewForm(
 			"/add", "Add sub",
 			webui.NewTextInputWithValue("name", "ss"),
 			webui.NewTextInputWithValue("url", "https://"),
 			webui.NewSubmitBtn("Add", "submit"),
 		)),
-		webui.NewDiv(webui.NewForm(
+		webui.NewDiv3C(webui.NewForm(
 			"/rules", "Add rules",
 			webui.NewTextInputWithValue("rule", "DOMAIN-SUFFIX,xxx.com,DIRECT"),
 			webui.NewSubmitBtn("Add", "submit2"),
@@ -163,9 +163,9 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	}
 
 	base.AddChild(webui.NewColumnDiv(
-		webui.NewDiv2C(nodeTable),
-		webui.NewDiv(rulesTable),
-		webui.NewDiv(proxyTable),
+		webui.NewDiv2C(proxyTable),
+		webui.NewDiv4C(nodeTable),
+		webui.NewDiv3C(rulesTable),
 	))
 
 	base.AddChild(webui.NewDiv(webui.NewText(pageMsg)))
