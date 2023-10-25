@@ -39,35 +39,36 @@ func prepareLinksData() ([]string, map[string][]string) {
 func renderPage(w http.ResponseWriter, req *http.Request) {
 	base := webui.NewBase("myindex")
 
-	headDiv := webui.NewDiv(
-		webui.NewHeader("Index", "h1"),
-		webui.NewLinkBtn("Refresh", "/"),
-	)
-
-	submitDiv := webui.NewDiv(
-		webui.NewForm("/add", "Add & Update",
-			webui.NewTextInput("name"),
-			webui.NewTextInputWithValue("url", "https://"),
-			webui.NewTextInputWithValue("folder", "default"),
-			webui.NewSubmitBtn("submit", "submit1"),
+	base.AddChild(
+		webui.NewDiv(
+			webui.NewHeader("Index", "h1"),
+			webui.NewLinkBtn("Refresh", "/"),
 		),
-	)
-
-	deleteDiv := webui.NewDiv(
-		webui.NewForm("/delete", "Delete",
-			webui.NewTextInput("name"),
-			webui.NewTextInputWithValue("folder", "default"),
-			webui.NewSubmitBtn("delete", "submit2"),
-		),
-	)
-
-	moveDiv := webui.NewDiv(
-		webui.NewForm("/move", "Move",
-			webui.NewTextInput("name"),
-			webui.NewTextInput("name_new"),
-			webui.NewTextInputWithValue("old_folder", "default"),
-			webui.NewTextInputWithValue("new_folder", "default"),
-			webui.NewSubmitBtn("move", "submit3"),
+		webui.NewColumnDiv(
+			webui.NewDiv3C(
+				webui.NewForm("/add", "Add & Update",
+					webui.NewTextInput("name"),
+					webui.NewTextInputWithValue("url", "https://"),
+					webui.NewTextInputWithValue("folder", "default"),
+					webui.NewSubmitBtn("submit", "submit1"),
+				),
+			),
+			webui.NewDiv3C(
+				webui.NewForm("/delete", "Delete",
+					webui.NewTextInput("name"),
+					webui.NewTextInputWithValue("folder", "default"),
+					webui.NewSubmitBtn("delete", "submit2"),
+				),
+			),
+			webui.NewDiv3C(
+				webui.NewForm("/move", "Move",
+					webui.NewTextInput("name"),
+					webui.NewTextInput("name_new"),
+					webui.NewTextInputWithValue("old_folder", "default"),
+					webui.NewTextInputWithValue("new_folder", "default"),
+					webui.NewSubmitBtn("move", "submit3"),
+				),
+			),
 		),
 	)
 
@@ -85,9 +86,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		}
 		infoDiv.AddChild(folderDiv)
 	}
-
-	formDiv := webui.NewColumnDiv(submitDiv, deleteDiv, moveDiv, webui.NewDiv())
-	base.AddChild(headDiv, formDiv, infoDiv)
+	base.AddChild(infoDiv)
 
 	w.Write([]byte(base.Render()))
 }
