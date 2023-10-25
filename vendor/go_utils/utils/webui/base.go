@@ -65,20 +65,57 @@ var BaseHTML string = `<!DOCTYPE html>
     color: white;
   }
   .ccdiv {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    display: block;
   }
-  @media screen and (max-width: 800px) {
+  [class*="div-"] { grid-column: span 1; }
+  @media screen and (min-width: 600px) {
     .ccdiv {
-      display: content;
-      grid-template-columns: auto;
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      .div-2 { grid-column: span 2; }
+      .div-3 { grid-column: span 3; }
+      .div-4 { grid-column: span 4; }
+      .div-5 { grid-column: span 5; }
+      .div-6 { grid-column: span 6; }
+      .div-7 { grid-column: span 6; }
+      .div-8 { grid-column: span 6; }
+      .div-9 { grid-column: span 6; }
+      .div-10 { grid-column: span 6; }
+      .div-11 { grid-column: span 6; }
+      .div-12 { grid-column: span 6; }
     }
   }
-  .div-2 {
-      grid-column: span 2;
+  @media screen and (min-width: 768px) {
+    .ccdiv {
+      grid-template-columns: repeat(8, 1fr);
+      .div-2 { grid-column: span 2; }
+      .div-3 { grid-column: span 3; }
+      .div-4 { grid-column: span 3; }
+      .div-5 { grid-column: span 4; }
+      .div-6 { grid-column: span 4; }
+      .div-7 { grid-column: span 5; }
+      .div-8 { grid-column: span 6; }
+      .div-9 { grid-column: span 6; }
+      .div-10 { grid-column: span 7; }
+      .div-11 { grid-column: span 7; }
+      .div-12 { grid-column: span 8; }
+    }
   }
-  .div-3 {
-      grid-column: span 3;
+  @media screen and (min-width: 1200px) {
+    .ccdiv {
+      grid-template-columns: repeat(12, 1fr);
+      .div-2 { grid-column: span 2; }
+      .div-3 { grid-column: span 3; }
+      .div-4 { grid-column: span 4; }
+      .div-5 { grid-column: span 5; }
+      .div-6 { grid-column: span 6; }
+      .div-7 { grid-column: span 7; }
+      .div-8 { grid-column: span 8; }
+      .div-9 { grid-column: span 9; }
+      .div-10 { grid-column: span 10; }
+      .div-11 { grid-column: span 11; }
+      .div-12 { grid-column: span 12; }
+    }
   }
   </style>
 </head>
