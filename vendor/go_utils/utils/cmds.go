@@ -14,7 +14,7 @@ func RunCmd(command string, env map[string]string) (string, error) {
 	}
 	ret, err := cmd.CombinedOutput()
 	if err != nil {
-		return "", err
+		return string(ret), err
 	}
 	return string(ret), nil
 }
