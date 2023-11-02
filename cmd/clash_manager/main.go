@@ -7,12 +7,6 @@ import (
 	"go_utils/utils/myhttp"
 )
 
-var kv *minikv.KV
-var clashYamlOutPath string
-
-var clashBinary string
-var clashConfigDir string
-
 func main() {
 	var verboseFlag = flag.Int("v", 0, "debug (max 4)")
 	var listenAddr = flag.String("l", "127.0.0.1", "listen address")
@@ -30,21 +24,19 @@ func main() {
 	kv.MustLoad()
 
 	LoadClashRules()
+	LoadClashProxies()
 
 	utils.SetLogLevelByVerboseFlag(*verboseFlag)
 
 	ss := myhttp.NewServer("cc", *listenAddr, *listenPort)
-	ss.AddGet("/", handleRoot)
-	ss.AddPost("/add", handleAddSub)
-	ss.AddPost("/rules", handleAddRules)
-	ss.AddGet("/delete", handleDelete)
-	ss.AddGet("/update", handleUpdete)
-	ss.AddGet("/selectproxy", handleSelectProxy)
-	ss.AddGet("/selectnode", handleSelectNode)
-	ss.AddGet("/deleterule", handleDeleteRules)
-	ss.AddGet("/gen", handleGenerateYaml)
-	ss.AddGet("/start", handleRunCmd)
-	ss.AddGet("/stop", handleTerminate)
+	ss.AddGet("/", handleIndex)
+	ss.AddREST("/rules", handleRules)
+	ss.AddGet("/rules/delete", handleRules)
+	ss.AddREST("/subs", handleSubs)
+	ss.AddGet("/subs/delete", handleSubs)
+	ss.AddGet("/subs/update", handleSubs)
+	ss.AddREST("/proxies", handleProxies)
+	ss.AddGet("/proxies/delete", handleProxies)
 
 	myhttp.RunServers(ss)
 }

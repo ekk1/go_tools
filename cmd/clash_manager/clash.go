@@ -11,20 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	clashManagerAddr = "http://127.0.0.1:9090"
-	clashRulesKey    = "CC_Rules"
-)
-
-type Proxy struct {
-	All  []string `json:"all"`
-	Name string   `json:"name"`
-	Type string   `json:"type"`
-	Now  string   `json:"now"`
-}
-
-var ClashRules []string = []string{}
-
 func LoadClashRules() {
 	if !kv.Exists(clashRulesKey) {
 		return
@@ -43,8 +29,8 @@ func SaveClashRules() {
 	utils.ErrExit(kv.Save())
 }
 
-func AddClashRules(rule string) {
-	ClashRules = append(ClashRules, rule)
+func AddClashRules(index int, rule string) {
+	ClashRules = slices.Insert(ClashRules, index, rule)
 	SaveClashRules()
 }
 
@@ -54,9 +40,41 @@ func DeleteClashRules(rule string) {
 	SaveClashRules()
 }
 
+func LoadClashProxies() {
+	if !kv.Exists(clashProxyKey) {
+		return
+	}
+	pps := kv.Get(clashProxyKey)
+	ppBytes, err := base64.URLEncoding.DecodeString(pps)
+	utils.ErrExit(err)
+	utils.ErrExit(json.Unmarshal(ppBytes, &ClashProxies))
+}
+
+func SaveClashProxies() {
+	ppBytes, err := json.Marshal(ClashProxies)
+	utils.ErrExit(err)
+	ppStr := base64.URLEncoding.EncodeToString(ppBytes)
+	utils.ErrExit(kv.Set(clashProxyKey, ppStr))
+	utils.ErrExit(kv.Save())
+}
+
+func AddClashProxies(name, filter string) {
+	ClashProxies[name] = filter
+	SaveClashProxies()
+}
+
+func DeleteClashProxies(name string) {
+	if _, ok := ClashProxies[name]; ok {
+		delete(ClashProxies, name)
+	}
+	SaveClashProxies()
+}
+
 func RenderClashYaml(subs []*Subscribe) string {
 	nodes := ""
 	nodesNames := ""
+	proxies := ""
+	allNodeList := []string{}
 	for _, sub := range subs {
 		switch sub.Name {
 		case "xianyu":
@@ -67,7 +85,7 @@ func RenderClashYaml(subs []*Subscribe) string {
 					tt, err := NewXianyuTrojan(line)
 					utils.ErrExit(err)
 					nodes += tt.Render()
-					nodesNames += "      - \"" + tt.Name + "\"\n"
+					allNodeList = append(allNodeList, tt.Name)
 				}
 			}
 		case "flower":
@@ -77,16 +95,36 @@ func RenderClashYaml(subs []*Subscribe) string {
 					utils.ErrExit(err)
 					nodes += tt.Render()
 					nodesNames += "      - \"" + tt.Name + "\"\n"
+					allNodeList = append(allNodeList, tt.Name)
 				}
 			}
 		}
+	}
+	ppList := []string{}
+	for p := range ClashProxies {
+		ppList = append(ppList, p)
+	}
+	slices.Sort(ppList)
+	for _, ppName := range ppList {
+		proxies += "  - name: " + ppName + "\n"
+		proxies += "    type: select\n"
+		proxies += "    proxies:\n"
+		filterKeys := strings.Split(ClashProxies[ppName], ",")
+		for _, nn := range allNodeList {
+			for _, kk := range filterKeys {
+				if strings.Contains(nn, kk) {
+					proxies += "      - \"" + nn + "\"\n"
+				}
+			}
+		}
+		proxies += "\n"
 	}
 	rules := ""
 	for _, r := range ClashRules {
 		rules += "  - " + r + "\n"
 	}
-	rules += "  - MATCH,p2"
-	return fmt.Sprintf(clashYamlBase, nodes, nodesNames, nodesNames, rules)
+	rules += "  - MATCH,all"
+	return fmt.Sprintf(clashYamlBase, nodes, proxies, rules)
 }
 
 func GetNodesByProxy(p string) ([]string, string, error) {
@@ -101,7 +139,6 @@ func GetNodesByProxy(p string) ([]string, string, error) {
 	if err := ret.JSON(pp); err != nil {
 		return nil, "", err
 	}
-
 	return pp.All, pp.Now, nil
 }
 

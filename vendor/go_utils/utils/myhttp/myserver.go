@@ -26,6 +26,20 @@ func (s *MiniServer) AddRoute(path string, method []string, h http.HandlerFunc) 
 	s.mux.HandleFunc(HandlerMaker(method, path, h))
 }
 
+func (s *MiniServer) AddREST(path string, h http.HandlerFunc) {
+	s.mux.HandleFunc(
+		HandlerMaker(
+			[]string{
+				http.MethodGet,
+				http.MethodPost,
+				http.MethodDelete,
+				http.MethodPut,
+			},
+			path, h,
+		),
+	)
+}
+
 func (s *MiniServer) AddGet(path string, h http.HandlerFunc) {
 	s.mux.HandleFunc(HandlerMaker([]string{http.MethodGet}, path, h))
 }

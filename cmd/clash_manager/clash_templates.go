@@ -31,15 +31,8 @@ proxies:
 %s
 
 proxy-groups:
-  - name: p2
-    type: select
-    proxies:
 %s
 
-  - name: p3
-    type: select
-    proxies:
-%s
 rules:
 %s
 `

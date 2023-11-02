@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"math/rand"
+	"slices"
 	"strings"
 )
 
@@ -29,4 +30,22 @@ func RandomString(length int64) string {
 		ret[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(ret)
+}
+
+func SortedKeysStr(m map[string]any) []string {
+	ret := make([]string, len(m))
+	for k := range m {
+		ret = append(ret, k)
+	}
+	slices.Sort(ret)
+	return ret
+}
+
+func SortedKeysInt(m map[int]any) []int {
+	ret := make([]int, len(m))
+	for k := range m {
+		ret = append(ret, k)
+	}
+	slices.Sort(ret)
+	return ret
 }
