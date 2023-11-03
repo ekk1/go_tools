@@ -10,10 +10,12 @@ import (
 	"time"
 )
 
-func (s *Subscribe) Update() error {
+func (s *Subscribe) Update(useProxy bool) error {
 	c := myhttp.NewHTTPClient()
-	if err := c.SetProxy("http://127.0.0.1:7890"); err != nil {
-		return err
+	if useProxy {
+		if err := c.SetProxy("http://127.0.0.1:7890"); err != nil {
+			return err
+		}
 	}
 	resp, err := c.SendReq(http.MethodGet, s.URL, nil)
 	if err != nil {

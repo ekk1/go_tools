@@ -58,8 +58,7 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 		allNodes, nowNode, err := GetNodesByProxy(CurrentProxy)
 		if err != nil {
 			utils.LogPrintError(err)
-			myhttp.ServerError(err.Error(), w, req)
-			return
+			CurrentProxy = ""
 		}
 		CurrentNode = nowNode
 		AllNodes = allNodes
@@ -152,11 +151,16 @@ func handleSubs(w http.ResponseWriter, req *http.Request) {
 		case strings.Contains(req.URL.Path, "update"):
 			utils.LogPrintInfo("Updating: ", name)
 			ss := LoadSingleSubscribe(ssPrefix + name)
+			proxy := req.URL.Query().Get("proxy")
 			if ss == nil {
 				myhttp.ServerError("failed to get ss", w, req)
 				return
 			}
-			if err := ss.Update(); err != nil {
+			useProxy := false
+			if proxy != "" {
+				useProxy = true
+			}
+			if err := ss.Update(useProxy); err != nil {
 				utils.LogPrintError(err)
 				myhttp.ServerError("failed to update", w, req)
 				return
