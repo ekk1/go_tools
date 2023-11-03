@@ -100,12 +100,7 @@ func RenderClashYaml(subs []*Subscribe) string {
 			}
 		}
 	}
-	ppList := []string{}
-	for p := range ClashProxies {
-		ppList = append(ppList, p)
-	}
-	slices.Sort(ppList)
-	for _, ppName := range ppList {
+	for _, ppName := range utils.SortedMapKeys(ClashProxies) {
 		proxies += "  - name: " + ppName + "\n"
 		proxies += "    type: select\n"
 		proxies += "    proxies:\n"

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"go_utils/utils"
 	"go_utils/utils/webui"
 	"net/http"
-	"slices"
 	"strconv"
 )
 
@@ -42,12 +42,7 @@ func renderIndex(w http.ResponseWriter) {
 	proxyTable := webui.NewTable(
 		webui.NewTableRow(true, "Proxy", "Now: "+CurrentProxy),
 	)
-	ppList := []string{}
-	for p := range ClashProxies {
-		ppList = append(ppList, p)
-	}
-	slices.Sort(ppList)
-	for _, p := range ppList {
+	for _, p := range utils.SortedMapKeys(ClashProxies) {
 		proxyTable.AddChild(webui.NewTableRow(false,
 			p, webui.NewLink("Select", "/?action=proxy&name="+p).Render(),
 		))
@@ -100,12 +95,7 @@ func renderSubManager(w http.ResponseWriter) {
 func renderProxyManager(w http.ResponseWriter) {
 	bb := generatePageStruct()
 	proxyTable := webui.NewTable(webui.NewTableRow(true, "Name", "Filter", ""))
-	ppList := []string{}
-	for p := range ClashProxies {
-		ppList = append(ppList, p)
-	}
-	slices.Sort(ppList)
-	for _, p := range ppList {
+	for _, p := range utils.SortedMapKeys(ClashProxies) {
 		proxyTable.AddChild(webui.NewTableRow(false, p, ClashProxies[p],
 			webui.NewLink("Delete", "/proxies/delete?name="+p).Render(),
 		))

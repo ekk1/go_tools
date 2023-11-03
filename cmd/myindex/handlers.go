@@ -6,7 +6,6 @@ import (
 	"go_utils/utils/webui"
 	"net/http"
 	"slices"
-	"sort"
 	"strings"
 )
 
@@ -14,10 +13,9 @@ var (
 	pageMsg string
 )
 
-func prepareLinksData() ([]string, map[string][]string) {
+func prepareLinksData() map[string][]string {
 	links := kv.Keys("LINK::")
 	linkDict := map[string][]string{}
-	dictKeys := []string{}
 
 	for _, v := range links {
 		fields := strings.Split(v, "::")
@@ -27,13 +25,9 @@ func prepareLinksData() ([]string, map[string][]string) {
 		linkDict[fields[1]] = append(
 			linkDict[fields[1]], fields[2],
 		)
-		if !slices.Contains(dictKeys, fields[1]) {
-			dictKeys = append(dictKeys, fields[1])
-		}
 	}
 
-	sort.Strings(dictKeys)
-	return dictKeys, linkDict
+	return linkDict
 }
 
 func renderPage(w http.ResponseWriter, req *http.Request) {
@@ -72,13 +66,13 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 		),
 	)
 
-	dictKeys, linkDict := prepareLinksData()
+	linkDict := prepareLinksData()
 	infoDiv := webui.NewDiv()
-	for _, v := range dictKeys {
+	for _, v := range utils.SortedMapKeys(linkDict) {
 		folderDiv := webui.NewDiv(
 			webui.NewHeader(v, "h3"),
 		)
-		sort.Strings(linkDict[v])
+		slices.Sort(linkDict[v])
 		for _, name := range linkDict[v] {
 			li := webui.NewLinkBtn(name, kv.Get("LINK::"+v+"::"+name))
 			li.SetAttr("target", "_blank")
