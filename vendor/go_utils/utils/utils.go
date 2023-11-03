@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bytes"
+	"cmp"
 	"math/rand"
 	"slices"
 	"strings"
@@ -32,17 +33,8 @@ func RandomString(length int64) string {
 	return string(ret)
 }
 
-func SortedKeysStr(m map[string]any) []string {
-	ret := make([]string, len(m))
-	for k := range m {
-		ret = append(ret, k)
-	}
-	slices.Sort(ret)
-	return ret
-}
-
-func SortedKeysInt(m map[int]any) []int {
-	ret := make([]int, len(m))
+func SortedMapKeys[K cmp.Ordered, V any](m map[K]V) []K {
+	ret := []K{}
 	for k := range m {
 		ret = append(ret, k)
 	}
