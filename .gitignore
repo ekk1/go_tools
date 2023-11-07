@@ -1,4 +1,5 @@
 cmd/clash_manager/clash_manager
+cmd/logger/logger
 cmd/torrent_checker/torrent_checker
 *.snapshot
 *.swp
