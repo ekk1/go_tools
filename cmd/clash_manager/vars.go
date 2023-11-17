@@ -9,7 +9,6 @@ const (
 	clashManagerAddr = "http://127.0.0.1:9090"
 	clashRulesKey    = "CC_Rules"
 	clashProxyKey    = "CC_Proxy"
-	ssPrefix         = "SS_"
 )
 
 var (
@@ -23,7 +22,6 @@ var (
 	CurrentNode  string
 	AllNodes     []string
 
-	ClashRules   []string          = []string{}
 	ClashProxies map[string]string = map[string]string{}
 
 	LastRuleType    = "DOMAIN-SUFFIX"
@@ -47,17 +45,8 @@ type Proxy struct {
 	Now  string   `json:"now"`
 }
 
-type Subscribe struct {
-	Name        string `json:"name"`
-	URL         string `json:"url"`
-	LastUpdated string `json:"last"`
-	Content     string `json:"content"`
-}
-
-type Trojan struct {
-	Name     string
-	Address  string
-	Port     string
-	Password string
-	Sni      string
+type RuleGroup struct {
+	Name   string   `json:"name"`
+	Rules  []string `json:"rules"`
+	Target string   `json:"target"`
 }

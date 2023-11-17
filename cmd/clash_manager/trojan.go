@@ -7,6 +7,14 @@ import (
 	"strings"
 )
 
+type Trojan struct {
+	Name     string
+	Address  string
+	Port     string
+	Password string
+	Sni      string
+}
+
 func NewFlowerTrojan(input string) (*Trojan, error) {
 	fields := strings.Split(input, ", ")
 	if len(fields) < 5 {

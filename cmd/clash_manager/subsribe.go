@@ -10,6 +10,17 @@ import (
 	"time"
 )
 
+const (
+	ssPrefix = "SS_"
+)
+
+type Subscribe struct {
+	Name        string `json:"name"`
+	URL         string `json:"url"`
+	LastUpdated string `json:"last"`
+	Content     string `json:"content"`
+}
+
 func (s *Subscribe) Update(useProxy bool) error {
 	c := myhttp.NewHTTPClient()
 	if useProxy {
