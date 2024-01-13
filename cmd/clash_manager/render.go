@@ -71,22 +71,56 @@ func renderIndex(w http.ResponseWriter) {
 func renderSubManager(w http.ResponseWriter) {
 	bb := generatePageStruct()
 
-	infoTable := webui.NewTable(webui.NewTableRow(true, "Name", "Last", "", ""))
+	infoTable := webui.NewTable(webui.NewTableRow(true, "Name", "Last", "", "", ""))
+	extraTable := webui.NewTable(webui.NewTableRow(true, "Name", "", ""))
 	for _, s := range LoadSubscribe() {
-		infoTable.AddChild(webui.NewTableRow(false,
-			s.Name, s.LastUpdated,
+		infoTable.AddChild(webui.NewTableRow(false, s.Name, s.LastUpdated,
 			webui.NewLink("Update", "/subs/update?name="+s.Name).Render(),
+			webui.NewLink("UpdateWithProxy", "/subs/update?proxy=1&name="+s.Name).Render(),
 			webui.NewLink("Delete", "/subs/delete?name="+s.Name).Render(),
 		))
 	}
+	for k := range CustomNodes {
+		extraTable.AddChild(webui.NewTableRow(false, k,
+			webui.NewLink("Edit", "/extra/edit?name="+k).Render(),
+			webui.NewLink("Delete", "/extra/delete?name="+k).Render(),
+		))
+	}
+	var (
+		extraNodeName     = "tr1"
+		extraNodeAddress  = ""
+		extraNodePort     = ""
+		extraNodePassword = ""
+		extraNodeSni      = ""
+	)
+	if SelectedExtraNode != "" {
+		if t, ok := CustomNodes[SelectedExtraNode]; ok {
+			extraNodeName = t.Name
+			extraNodeAddress = t.Address
+			extraNodePort = t.Port
+			extraNodePassword = t.Password
+			extraNodeSni = t.Sni
+		}
+	}
 	bb.AddChild(webui.NewColumnDiv(
-		webui.NewDiv3C(webui.NewForm(
-			"/subs", "Add sub",
-			webui.NewTextInputWithValue("name", "ss"),
-			webui.NewTextInputWithValue("url", "https://"),
-			webui.NewSubmitBtn("Add", "submit"),
-		)),
-		webui.NewDiv6C(infoTable),
+		webui.NewDiv3C(
+			webui.NewDiv(webui.NewForm(
+				"/subs", "Add sub",
+				webui.NewTextInputWithValue("name", "ss"),
+				webui.NewTextInputWithValue("url", "https://"),
+				webui.NewSubmitBtn("Add", "submit"),
+			)),
+			webui.NewDiv(webui.NewForm(
+				"/extra", "Add Extra Trojan",
+				webui.NewTextInputWithValue("name", extraNodeName),
+				webui.NewTextInputWithValue("address", extraNodeAddress),
+				webui.NewTextInputWithValue("port", extraNodePort),
+				webui.NewTextInputWithValue("password", extraNodePassword),
+				webui.NewTextInputWithValue("sni", extraNodeSni),
+				webui.NewSubmitBtn("Add", "submit"),
+			)),
+		),
+		webui.NewDiv6C(webui.NewDiv(infoTable), webui.NewDiv(extraTable)),
 	))
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(bb.Render()))

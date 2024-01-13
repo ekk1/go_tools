@@ -8,11 +8,11 @@ import (
 )
 
 type Trojan struct {
-	Name     string
-	Address  string
-	Port     string
-	Password string
-	Sni      string
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	Port     string `json:"port"`
+	Password string `json:"password"`
+	Sni      string `json:"sni"`
 }
 
 func NewFlowerTrojan(input string) (*Trojan, error) {

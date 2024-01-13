@@ -5,7 +5,18 @@ import (
 	"os"
 	"os/exec"
 	"runtime"
+	"sync"
 	"syscall"
+)
+
+var (
+	procChan chan int = make(chan int)
+	procSync          = &struct {
+		state bool
+		lock  sync.Mutex
+	}{
+		state: false,
+	}
 )
 
 func RunClash() bool {

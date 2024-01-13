@@ -12,7 +12,5 @@ func TestClash(t *testing.T) {
 
 	LoadClashRules()
 
-	subs := LoadSubscribe()
-	utils.LogPrintInfo(RenderClashYaml(subs))
-
+	utils.LogPrintInfo(RenderClashYaml())
 }

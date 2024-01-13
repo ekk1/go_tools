@@ -25,7 +25,7 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 			return
 		}
 	case "generate":
-		ret := RenderClashYaml(LoadSubscribe())
+		ret := RenderClashYaml()
 		err := os.WriteFile(clashYamlOutPath, []byte(ret), 0600)
 		if err != nil {
 			myhttp.ServerError("Failed to write yaml", w, req)
@@ -137,6 +137,7 @@ func handleProxies(w http.ResponseWriter, req *http.Request) {
 
 func handleSubs(w http.ResponseWriter, req *http.Request) {
 	name := req.URL.Query().Get("name")
+	SelectedExtraNode = ""
 	switch req.Method {
 	case http.MethodGet:
 		switch {
@@ -186,6 +187,44 @@ func handleSubs(w http.ResponseWriter, req *http.Request) {
 		if err := ss.Save(); err != nil {
 			utils.LogPrintError(err)
 			myhttp.ServerError("failed to save", w, req)
+			return
+		}
+	}
+	renderSubManager(w)
+}
+
+func handleExtraNodes(w http.ResponseWriter, req *http.Request) {
+	name := req.URL.Query().Get("name")
+	SelectedExtraNode = ""
+	switch req.Method {
+	case http.MethodGet:
+		switch {
+		case strings.Contains(req.URL.Path, "delete"):
+			DeleteCustomNode(name)
+		case strings.Contains(req.URL.Path, "edit"):
+			SelectedExtraNode = name
+		}
+	case http.MethodPost:
+		trName := req.FormValue("name")
+		trAddr := req.FormValue("address")
+		trPort := req.FormValue("port")
+		trPass := req.FormValue("password")
+		trSni := req.FormValue("sni")
+		utils.LogPrintInfo("Got extra:", trName)
+		if !myhttp.ServerCheckParam(trName, trAddr, trPort, trPass, trSni) {
+			myhttp.ServerError("Field can not be empty", w, req)
+			return
+		}
+		tr := &Trojan{
+			Name:     trName,
+			Address:  trAddr,
+			Port:     trPort,
+			Password: trPass,
+			Sni:      trSni,
+		}
+		if err := AddCustomNode(trName, tr); err != nil {
+			utils.LogPrintError(err)
+			myhttp.ServerError("failed to add custom node", w, req)
 			return
 		}
 	}

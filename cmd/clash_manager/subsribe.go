@@ -11,7 +11,14 @@ import (
 )
 
 const (
-	ssPrefix = "SS_"
+	ssPrefix      = "SS_"
+	customNodeKey = "CC_ExtraNodes"
+)
+
+var (
+	CustomNodes map[string]*Trojan = make(map[string]*Trojan)
+
+	SelectedExtraNode string = ""
 )
 
 type Subscribe struct {
@@ -74,4 +81,43 @@ func LoadSubscribe() []*Subscribe {
 		}
 	}
 	return ret
+}
+
+func AddCustomNode(name string, t *Trojan) error {
+	CustomNodes[name] = t
+	return SaveCustomNodes()
+}
+
+func DeleteCustomNode(name string) error {
+	if _, ok := CustomNodes[name]; ok {
+		delete(CustomNodes, name)
+	}
+	return SaveCustomNodes()
+}
+
+func SaveCustomNodes() error {
+	customNodesBytes, err := json.Marshal(CustomNodes)
+	if err != nil {
+		return err
+	}
+	customNodesString := base64.StdEncoding.EncodeToString(customNodesBytes)
+	if err := kv.Set(customNodeKey, string(customNodesString)); err != nil {
+		return nil
+	}
+	return kv.Save()
+}
+
+func LoadCustomNodes() error {
+	if !kv.Exists(customNodeKey) {
+		return nil
+	}
+	customNodesString := kv.Get(customNodeKey)
+	customNodesBytes, err := base64.StdEncoding.DecodeString(customNodesString)
+	if err != nil {
+		return err
+	}
+	if err := json.Unmarshal(customNodesBytes, &CustomNodes); err != nil {
+		return err
+	}
+	return nil
 }
