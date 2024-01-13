@@ -232,14 +232,6 @@ func NewTextInput(name string) *GroupElement {
 	)
 }
 
-func NewPasswordInput(name string) *GroupElement {
-	idSuffix := utils.RandomString(5)
-	return NewGroupElement(
-		NewLabel(name, name+"-"+idSuffix),
-		NewInput(name, "password", "", name+"-"+idSuffix), NewBR(),
-	)
-}
-
 func NewTextInputWithValue(name, value string) *GroupElement {
 	idSuffix := utils.RandomString(5)
 	return NewGroupElement(
