@@ -1,14 +1,16 @@
 package utils
 
 import (
+	"strings"
 	"testing"
 )
 
 func TestRunCmd(t *testing.T) {
-	for _, cmd := range []string{"sleep 1", "date"} {
+	for _, cmd := range []string{"sleep 1", "date", "aa"} {
 		if ret, err := RunCmd(cmd, nil); err == nil {
 			LogPrintInfo(ret)
 		} else {
+			LogPrintError(ret)
 			LogPrintError(err)
 		}
 	}
@@ -23,13 +25,8 @@ func TestListDirFiles(t *testing.T) {
 }
 
 func TestSome(t *testing.T) {
-	aa := map[string]int64{}
-	t.Log(aa)
-	aa["test"]++
-	aa["test"]++
-	aa["test"]++
-	aa["test"]++
-	t.Log(aa)
+	aa := "aaa   0/1     Completed   0          1d"
+	LogPrintInfo(strings.Fields(aa))
 }
 
 func TestSortMapKeys(t *testing.T) {

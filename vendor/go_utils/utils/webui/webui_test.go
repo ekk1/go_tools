@@ -49,6 +49,7 @@ func TestUI(t *testing.T) {
 		NewTableRow(true, "test1", "test2"),
 		NewTableRow(false, "test1", "test2"),
 	)))
+	base.AddChild(NewImageFromFile("jpg", "test.jpg"))
 
 	t.Log(base.Render())
 	os.WriteFile("test.html", []byte(base.Render()), 0644)

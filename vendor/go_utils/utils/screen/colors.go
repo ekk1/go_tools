@@ -1,6 +1,11 @@
 package screen
 
-import "fmt"
+import (
+	"fmt"
+	"sync"
+)
+
+var LogLock sync.Mutex = sync.Mutex{}
 
 const (
 	ANSI_COLOR_BLACK   string = "\033[30m"
@@ -25,12 +30,16 @@ const (
 )
 
 func ColoredPrint(style string, msg ...any) {
+	LogLock.Lock()
+	defer LogLock.Unlock()
 	fmt.Print(style)
 	fmt.Print(msg...)
 	fmt.Print(ANSI_COLOR_RESET)
 }
 
 func ColoredPrintln(style string, msg ...any) {
+	LogLock.Lock()
+	defer LogLock.Unlock()
 	fmt.Print(style)
 	fmt.Println(msg...)
 	fmt.Print(ANSI_COLOR_RESET)
