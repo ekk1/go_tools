@@ -56,3 +56,23 @@ func TestSortMapKeys(t *testing.T) {
 		t.Log(v)
 	}
 }
+
+func TestGenericWaiter(t *testing.T) {
+	tester := "test"
+
+	ff := func() bool {
+		if tester == "test" {
+			return true
+		} else {
+			t.Log("tester is:", tester)
+		}
+		return false
+	}
+
+	if err := GenericWaiter(10, ff, "aa"); err != nil {
+		t.Log("Failed wait")
+		t.Log(err)
+	} else {
+		t.Log("Finished")
+	}
+}

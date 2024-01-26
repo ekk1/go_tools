@@ -3,9 +3,12 @@ package utils
 import (
 	"bytes"
 	"cmp"
+	"errors"
+	"fmt"
 	"math/rand"
 	"slices"
 	"strings"
+	"time"
 )
 
 func ErrExit(err error) {
@@ -40,4 +43,22 @@ func SortedMapKeys[K cmp.Ordered, V any](m map[K]V) []K {
 	}
 	slices.Sort(ret)
 	return ret
+}
+
+func GenericWaiter(timeout int64, f func() bool, warning string) error {
+	startTime := time.Now()
+	for {
+		nowTime := time.Now()
+		if nowTime.Sub(startTime) > (time.Duration(timeout) * time.Second) {
+			msg := fmt.Sprintf(
+				"Failed to %s within %d seconds", warning, timeout,
+			)
+			return errors.New(msg)
+		}
+		if f() {
+			break
+		}
+		time.Sleep(3 * time.Second)
+	}
+	return nil
 }
