@@ -44,11 +44,14 @@ func NewXianyuTrojan(input string) (*Trojan, error) {
 			sniData = strings.Split(v, "=")[1]
 		}
 	}
+	hostPort := strings.Split(basicInfo[1], ":")
+	xianyuPort := hostPort[len(hostPort)-1]
+	xianyuHost := strings.Join(hostPort[:len(hostPort)-1], ":")
 	return &Trojan{
 		Name:     decodedName,
 		Password: strings.Split(basicInfo[0], "://")[1],
-		Address:  strings.Split(basicInfo[1], ":")[0],
-		Port:     strings.Split(basicInfo[1], ":")[1],
+		Address:  xianyuHost,
+		Port:     xianyuPort,
 		Sni:      sniData,
 	}, nil
 }
