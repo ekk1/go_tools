@@ -13,7 +13,16 @@ type Element struct {
 	Value      string
 	ValueEnd   string
 	EndTag     string
+	Style      map[string]string
 	Children   []WebUI
+}
+
+type GroupElement struct {
+	Elements []*Element
+}
+
+func (e *Element) SetAttr(k, v string) {
+	e.Attributes[k] = v
 }
 
 func (e *Element) SetID(id string) {
@@ -24,8 +33,8 @@ func (e *Element) SetClass(class string) {
 	e.SetAttr("class", class)
 }
 
-func (e *Element) SetAttr(k, v string) {
-	e.Attributes[k] = v
+func (e *Element) SetBgColor(color string) {
+	e.Style["background-color"] = color
 }
 
 func (e *Element) AddChild(w ...WebUI) {
@@ -35,6 +44,11 @@ func (e *Element) AddChild(w ...WebUI) {
 }
 
 func (e *Element) Render() string {
+	styleString := ""
+	for k, v := range e.Style {
+		styleString += fmt.Sprintf("%s: %s;", k, v)
+	}
+	e.Attributes["style"] = styleString
 	attrString := ""
 	for k, v := range e.Attributes {
 		attrString += fmt.Sprintf(" %s=\"%s\"", k, v)
@@ -58,6 +72,7 @@ func NewElement(tag, value string) *Element {
 		Value:      value,
 		Children:   []WebUI{},
 		Attributes: map[string]string{},
+		Style:      map[string]string{},
 	}
 }
 
@@ -67,11 +82,8 @@ func NewElementWithNoEndTag(tag, value string) *Element {
 		Value:      value,
 		Children:   []WebUI{},
 		Attributes: map[string]string{},
+		Style:      map[string]string{},
 	}
-}
-
-type GroupElement struct {
-	Elements []*Element
 }
 
 func NewGroupElement(e ...*Element) *GroupElement {
@@ -187,6 +199,7 @@ func NewButton(content, link string) *Element {
 	b.AddChild(e)
 	return b
 }
+
 func NewBR() *Element {
 	return NewElementWithNoEndTag("br", "")
 }
@@ -295,5 +308,11 @@ func NewImageFromFile(imageType, filename string) *Element {
 		dataStr = base64.StdEncoding.EncodeToString(data)
 	}
 	im.SetAttr("src", "data:image/"+imageType+";base64,"+dataStr)
+	return im
+}
+
+func NewImageFromLink(imageType, imgLink string) *Element {
+	im := NewElementWithNoEndTag("img", "")
+	im.SetAttr("src", imgLink)
 	return im
 }

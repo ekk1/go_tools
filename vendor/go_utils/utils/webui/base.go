@@ -45,6 +45,7 @@ var BaseHTML string = `<!DOCTYPE html>
   }
   div {
     padding: 10px;
+    margin: 5px;
   }
   .btn {
     margin: 5px;
