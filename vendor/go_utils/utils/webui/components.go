@@ -37,6 +37,17 @@ func (e *Element) SetBgColor(color string) {
 	e.Style["background-color"] = color
 }
 
+func (e *Element) SetBorder(color string) {
+	e.Style["border"] = "1.5px solid " + color
+	e.Style["border-radius"] = "15px"
+}
+
+func (e *Element) SetContentCenter() {
+	e.Style["align-items"] = "center"
+	e.Style["display"] = "grid"
+	e.Style["text-align"] = "center"
+}
+
 func (e *Element) AddChild(w ...WebUI) {
 	for _, v := range w {
 		e.Children = append(e.Children, v)
@@ -48,7 +59,9 @@ func (e *Element) Render() string {
 	for k, v := range e.Style {
 		styleString += fmt.Sprintf("%s: %s;", k, v)
 	}
-	e.Attributes["style"] = styleString
+	if styleString != "" {
+		e.Attributes["style"] = styleString
+	}
 	attrString := ""
 	for k, v := range e.Attributes {
 		attrString += fmt.Sprintf(" %s=\"%s\"", k, v)
@@ -163,6 +176,32 @@ func NewDiv11C(w ...WebUI) *Element {
 func NewDiv12C(w ...WebUI) *Element {
 	d := NewDiv(w...)
 	d.SetClass("div-12")
+	return d
+}
+func NewDivThird(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-third")
+	return d
+}
+func NewDivHalf(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-half")
+	return d
+}
+func NewDivFull(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-full")
+	return d
+}
+
+func NewCardHalf(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-half content-card")
+	return d
+}
+func NewCardFull(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-full content-card")
 	return d
 }
 

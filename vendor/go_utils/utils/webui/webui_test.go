@@ -8,61 +8,52 @@ import (
 func TestUI(t *testing.T) {
 	t.Log("Testing")
 
-	base := NewBase("Test")
+	base := NewNavBase("test")
 
-	cc := NewColumnDiv()
-	cc2 := NewColumnDiv()
-	cc3 := NewColumnDiv()
+	base.AddNavItem("Index", "#")
+	base.AddNavItem("Config", "#")
+	base.AddNavItem("About", "#")
+	base.AddNavItem("Links", "#")
 
-	div1 := NewDiv4C()
-	div1.SetBgColor("cyan")
+	base.CurrentNavItem = "Index"
 
-	div2 := NewDiv4C()
-	div2.SetID("22")
-	div2.SetBgColor("pink")
+	//hh := NewHeader("test", "h3")
+	//text := NewText("test1123")
+	//testPre := NewPreText("tet\n123")
 
-	p1 := NewText("test")
-
-	h1 := NewHeader("test", "h1")
-	div1.AddChild(p1, p1, h1)
-	div2.AddChild(h1, p1)
-
-	t1 := NewTable()
-	t1.AddChild(NewTableRow(true, "header1 test", "header2 test", "h3"))
-	t1.AddChild(NewTableRow(false, "h1", "h2", "adwad"))
-
-	div1.AddChild(t1)
-
-	cc.AddChild(div1, div2)
-
-	f1 := NewForm("http://127.0.0.1:5000/post", "test",
-		NewTextInput("test"),
+	form1 := NewForm("http://127.0.0.1:5000/post", "test")
+	form1.AddChild(
+		NewTextInputWithValue("test", "value"),
+		NewCheckBox("OK"),
+		NewRadioInput("radio1", "A"),
+		NewRadioInput("radio1", "B"),
+		NewRadioInput("radio1", "C"),
+		NewSubmitBtn("submit", "submit1"),
 	)
-	f2 := NewForm("http://127.0.0.1:5000/post", "test2",
-		NewTextInput("test88"),
+	form2 := NewForm("http://127.0.0.1:5000/post", "test")
+	form2.AddChild(
+		NewTextInputWithValue("test2", "value"),
+		NewCheckBox("OK2"),
+		NewRadioInput("radio2", "A"),
+		NewRadioInput("radio2", "B"),
+		NewRadioInput("radio2", "C"),
+		NewSubmitBtn("submit", "submit1"),
+		NewSubmitBtn("cancel", "submit2"),
 	)
 
-	f1.AddChild(NewTextInput("test91"))
-	f1.AddChild(NewTextInputWithValue("test2", "value2"))
-	f1.AddChild(NewCheckBox("test3"))
-	f1.AddChild(NewRadioInput("test4", "value2"))
-	f1.AddChild(NewRadioInput("test4", "value3"))
-	f1.AddChild(NewRadioInput("test4", "value4"))
-	f1.AddChild(NewRadioInput("test4", "value5"))
-	f1.AddChild(NewSubmitBtn("name", "id"))
-	f2.AddChild(NewSubmitBtn("name", "id"))
+	//pane1 := NewCardHalf(hh, text, testPre)
+	//pane2 := NewCardHalf(hh, text, testPre)
+	//pane3 := NewCardHalf(hh, form1)
+	//pane4 := NewCardHalf(hh, form2)
+	//base.AddSection("section 1", pane1, pane3)
+	//base.AddSection("section 2", pane2, pane4)
 
-	cc2.AddChild(NewDiv4C(f1))
-	cc2.AddChild(NewDiv4C(f2))
+	paneAbout := NewCardFull(
+		NewHeader("About", "h2"),
+		NewPreText("this is text\njdwioajwd\n\n\n\n\n\n\n\n\n\n\n\n\n\n"),
+	)
+	paneAbout.SetContentCenter()
+	base.AddContent(paneAbout)
 
-	cc3.AddChild(NewDiv6C(NewTable(
-		NewTableRow(true, "test1", "test2"),
-		NewTableRow(false, "test1", "test2"),
-	)))
-
-	base.AddChild(cc, cc2, cc3)
-	base.AddChild(NewImageFromFile("jpg", "test.jpg"))
-
-	t.Log(base.Render())
-	os.WriteFile("test.html", []byte(base.Render()), 0644)
+	os.WriteFile("output/test.html", []byte(base.Render()), 0644)
 }
