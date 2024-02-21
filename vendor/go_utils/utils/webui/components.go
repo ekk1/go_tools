@@ -194,6 +194,11 @@ func NewDivFull(w ...WebUI) *Element {
 	return d
 }
 
+func NewCardThird(w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("div-third content-card")
+	return d
+}
 func NewCardHalf(w ...WebUI) *Element {
 	d := NewDiv(w...)
 	d.SetClass("div-half content-card")

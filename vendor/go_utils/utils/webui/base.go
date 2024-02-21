@@ -57,6 +57,7 @@ var BaseHTML string = `<!DOCTYPE html>
     margin: 5px;
   }
   .btn {
+    color: black;
     margin: 5px;
     font-family: monospace;
     background-color: rgba(0,0,0,0);

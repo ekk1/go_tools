@@ -31,45 +31,48 @@ func prepareLinksData() map[string][]string {
 }
 
 func renderPage(w http.ResponseWriter, req *http.Request) {
-	base := webui.NewBase("myindex")
+	base := webui.NewNavBase("myindex")
 
-	base.AddChild(
-		webui.NewDiv(
+	base.AddNavItem("Index", "/")
+	base.CurrentNavItem = "Index"
+
+	base.AddSection(
+		"Control",
+		webui.NewCardHalf(
 			webui.NewHeader("Index", "h1"),
 			webui.NewLinkBtn("Refresh", "/"),
 		),
-		webui.NewColumnDiv(
-			webui.NewDiv3C(
-				webui.NewForm("/add", "Add & Update",
-					webui.NewTextInput("name"),
-					webui.NewTextInputWithValue("url", "https://"),
-					webui.NewTextInputWithValue("folder", "default"),
-					webui.NewSubmitBtn("submit", "submit1"),
-				),
+	)
+	base.AddSection("Edit",
+		webui.NewCardThird(
+			webui.NewForm("/add", "Add & Update",
+				webui.NewTextInput("name"),
+				webui.NewTextInputWithValue("url", "https://"),
+				webui.NewTextInputWithValue("folder", "default"),
+				webui.NewSubmitBtn("submit", "submit1"),
 			),
-			webui.NewDiv3C(
-				webui.NewForm("/delete", "Delete",
-					webui.NewTextInput("name"),
-					webui.NewTextInputWithValue("folder", "default"),
-					webui.NewSubmitBtn("delete", "submit2"),
-				),
+		),
+		webui.NewCardThird(
+			webui.NewForm("/delete", "Delete",
+				webui.NewTextInput("name"),
+				webui.NewTextInputWithValue("folder", "default"),
+				webui.NewSubmitBtn("delete", "submit2"),
 			),
-			webui.NewDiv3C(
-				webui.NewForm("/move", "Move",
-					webui.NewTextInput("name"),
-					webui.NewTextInput("name_new"),
-					webui.NewTextInputWithValue("old_folder", "default"),
-					webui.NewTextInputWithValue("new_folder", "default"),
-					webui.NewSubmitBtn("move", "submit3"),
-				),
+		),
+		webui.NewCardThird(
+			webui.NewForm("/move", "Move",
+				webui.NewTextInput("name"),
+				webui.NewTextInput("name_new"),
+				webui.NewTextInputWithValue("old_folder", "default"),
+				webui.NewTextInputWithValue("new_folder", "default"),
+				webui.NewSubmitBtn("move", "submit3"),
 			),
 		),
 	)
 
 	linkDict := prepareLinksData()
-	infoDiv := webui.NewDiv()
 	for _, v := range utils.SortedMapKeys(linkDict) {
-		folderDiv := webui.NewDiv(
+		folderDiv := webui.NewCardFull(
 			webui.NewHeader(v, "h3"),
 		)
 		slices.Sort(linkDict[v])
@@ -78,9 +81,8 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 			li.SetAttr("target", "_blank")
 			folderDiv.AddChild(li)
 		}
-		infoDiv.AddChild(folderDiv)
+		base.AddSection("", folderDiv)
 	}
-	base.AddChild(infoDiv)
 
 	w.Write([]byte(base.Render()))
 }
