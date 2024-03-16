@@ -27,6 +27,9 @@ var BaseHTML string = `<!DOCTYPE html>
   h1 {
     color: DarkMagenta;
   }
+  table {
+    margin-top: 20px;
+  }
   table, th, td {
     border: 1px solid black;
     border-collapse: collapse;
