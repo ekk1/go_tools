@@ -2,6 +2,7 @@ cmd/clash_manager/clash_manager
 cmd/logger/logger
 cmd/torrent_checker/torrent_checker
 cmd/myindex/myindex
+cmd/index_interface/main
 *.snapshot
 *.swp
 *.yml
