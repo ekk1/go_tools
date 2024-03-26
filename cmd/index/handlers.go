@@ -102,7 +102,7 @@ func handleLoad(w http.ResponseWriter, req *http.Request) {
 			w.Write([]byte("Corrupt data"))
 			return
 		}
-		w.Write([]byte(base64.URLEncoding.EncodeToString(readData)))
+		w.Write(readData)
 		return
 	}
 
