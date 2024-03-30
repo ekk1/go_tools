@@ -130,7 +130,7 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 	utils.LogPrintDebug4("HTTP BodyBytes: ", data)
 	utils.LogPrintDebug3("HTTP BodyString: ", string(data))
 
-	return &HTTPResponse{data: data}, nil
+	return &HTTPResponse{Data: data, Status: ret.Status}, nil
 }
 
 func (h *HTTPClient) SetSendJSON(isSendJSON bool) bool {
@@ -205,16 +205,17 @@ func (h *HTTPClient) SetCustomCert(certPath []string) error {
 }
 
 type HTTPResponse struct {
-	data []byte
+	Status string
+	Data   []byte
 }
 
 func (r *HTTPResponse) JSON(recvStruct interface{}) error {
 	if recvStruct == nil {
 		return errors.New("Receive struct is nil!!!")
 	}
-	return json.Unmarshal(r.data, recvStruct)
+	return json.Unmarshal(r.Data, recvStruct)
 }
 
 func (r *HTTPResponse) Text() string {
-	return string(r.data)
+	return string(r.Data)
 }
