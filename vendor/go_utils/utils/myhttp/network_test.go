@@ -1,8 +1,10 @@
 package myhttp
 
 import (
+	"go_utils/utils"
 	"net/url"
 	"testing"
+	"time"
 )
 
 /*
@@ -69,5 +71,23 @@ func TestHTTPClient(t *testing.T) {
 		t.Log(ret.Text())
 	} else {
 		t.Fatal(err)
+	}
+}
+
+func TestDownloadFile(t *testing.T) {
+	utils.SetLogLevelByVerboseFlag(utils.LOG_LEVEL_DEBUG)
+	c := NewHTTPClient()
+	c.SetDisableCompress()
+	c.SetBasicAuth("", "")
+	c.SetProxy("")
+	downloadName := "testNew"
+	for {
+		_, err := c.DownloadFile("", downloadName)
+		if err != nil {
+			utils.LogPrintError("Error during download, retring: ", err)
+		} else {
+			break
+		}
+		time.Sleep(3 * time.Second)
 	}
 }

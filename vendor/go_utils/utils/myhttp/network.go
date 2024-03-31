@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"go_utils/utils"
 	"io"
 	"net"
@@ -119,9 +120,9 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 		utils.LogPrintError("Failed to do request")
 		return nil, err
 	}
+	defer ret.Body.Close()
 	utils.LogPrintDebug2("HTTP Status: ", ret.Status)
 	utils.LogPrintDebug2("HTTP Headers: ", ret.Header)
-	defer ret.Body.Close()
 
 	data, err := io.ReadAll(ret.Body)
 	if err != nil {
@@ -174,6 +175,15 @@ func (h *HTTPClient) SetProxy(proxyURL string) error {
 	return nil
 }
 
+func (h *HTTPClient) SetDisableCompress() error {
+	if ts, ok := h.c.Transport.(*http.Transport); ok {
+		ts.DisableCompression = true
+	} else {
+		return errors.New("Failed to get transport")
+	}
+	return nil
+}
+
 func (h *HTTPClient) SetBasicAuth(username, password string) {
 	h.username = username
 	h.password = password
@@ -202,6 +212,117 @@ func (h *HTTPClient) SetCustomCert(certPath []string) error {
 		}
 	}
 	return nil
+}
+
+func (h *HTTPClient) DownloadFile(url, downloadName string) (int64, error) {
+	var downloadBuffer []byte = make([]byte, 16*1024*1024)
+	totalRead := int64(0)
+	totalWritten := int64(0)
+
+	f, err := os.OpenFile(downloadName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0640)
+	if err != nil {
+		return 0, err
+	}
+	defer f.Close()
+	// Check file info, and do not download if alread finished
+	fInfo, err := f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	totalWritten = fInfo.Size()
+	if totalWritten != 0 {
+		h.SetHeader("Range", fmt.Sprintf("bytes=%d-", totalWritten))
+	}
+
+	// Prepare HTTP request and get the response
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return 0, err
+	}
+	for k, v := range h.headers {
+		req.Header.Set(k, v[0])
+	}
+	if h.username != "" && h.password != "" {
+		req.SetBasicAuth(h.username, h.password)
+	}
+	utils.LogPrintDebug(req.Header)
+	res, err := h.c.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode == http.StatusRequestedRangeNotSatisfiable {
+		utils.LogPrintWarning("Incorrect range, file may have already been downloaded")
+		return 0, nil
+	}
+
+	if totalWritten != 0 && res.StatusCode == http.StatusOK {
+		utils.LogPrintWarning("Server may not support partial download, redownloading all contents")
+		f.Close()
+		f, err = os.OpenFile(downloadName, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0640)
+		if err != nil {
+			return 0, err
+		}
+		defer f.Close()
+		totalWritten = 0
+	}
+
+	// 1. range not set, ContentLength == expected size
+	// 2. range set, and is resume: ContentLength == (expected size) - downloaded
+	// 3. range set, and overflow: ContentLength == 196 (for nginx), and should not download
+	// 4. range set, and not accepted by server, ContentLength == expected size
+	totalSize := res.ContentLength
+	if totalSize == -1 {
+		utils.LogPrintWarning("Cannot get correct content size")
+	}
+	totalWritten = 0
+
+	for {
+		time.Sleep(3 * time.Second)
+		num, errRead := io.ReadFull(res.Body, downloadBuffer)
+		utils.LogPrintDebug(num, errRead)
+		if num > 0 {
+			totalRead += int64(num)
+			written, errWrite := f.Write(downloadBuffer[:num])
+			totalWritten += int64(written)
+			if errWrite != nil {
+				return totalWritten, errWrite
+			}
+			utils.LogPrintInfo(
+				fmt.Sprintf(
+					"Downloading...  %dMB / %dMB",
+					int64(totalRead/1024/1024),
+					int64(totalSize/1024/1024),
+				),
+			)
+		}
+		if errRead != nil {
+			if errors.Is(errRead, io.EOF) ||
+				errors.Is(errRead, io.ErrUnexpectedEOF) {
+				if totalRead == totalSize {
+					break
+				} else if totalSize == -1 {
+					utils.LogPrintError("Cannot determine total size, and EOF is met, please check download manually: ", errRead)
+					return totalWritten, nil
+				} else {
+					utils.LogPrintError("Incompleted download: ", errRead)
+					utils.LogPrintWarning("Total read: ", totalRead, " Total size: ", totalSize)
+					return totalWritten, errors.New("Incompleted download")
+				}
+			} else {
+				utils.LogPrintError("Error during download: ", errRead)
+				return totalWritten, errRead
+			}
+		}
+	}
+
+	if totalWritten == totalSize {
+		return totalWritten, nil
+	}
+	return totalWritten, errors.New(fmt.Sprintf(
+		"Unexpected totalWritten not equal totalSize: %d / %d", totalWritten, totalSize,
+	))
 }
 
 type HTTPResponse struct {
