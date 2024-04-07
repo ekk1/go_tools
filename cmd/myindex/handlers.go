@@ -37,7 +37,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 	base.CurrentNavItem = "Index"
 
 	base.AddSection(
-		"Control",
+		"",
 		webui.NewCardHalf(
 			webui.NewHeader("Index", "h1"),
 			webui.NewLinkBtn("Refresh", "/"),
