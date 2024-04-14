@@ -2,7 +2,6 @@ package main
 
 import (
 	_ "embed"
-	"encoding/json"
 	"fmt"
 )
 
@@ -26,29 +25,6 @@ const (
 	PlantTypeCotton    PlantType = "cotton"
 	PlantTypeRice      PlantType = "rice"
 )
-
-type ItemConfigTable struct {
-	ResourceTable map[ResourceType]*ResourceProperty `json:"resources"`
-	PlantTable    map[PlantType]*PlantProperty       `json:"plants"`
-}
-type ResourceProperty struct {
-	Size int64 `json:"size"`
-}
-type PlantProperty struct {
-	Outputs map[ResourceType]*PlantOutput `json:"outputs"`
-	Max     int64                         `json:"max"`
-	Speed   int64                         `json:"speed"`
-}
-type PlantOutput struct {
-	Need   int64 `json:"need"`
-	Output int64 `json:"out"`
-}
-
-var GlobalItemConfigTable *ItemConfigTable
-
-func LoadConfigTable() error {
-	return json.Unmarshal(itemsJson, GlobalItemConfigTable)
-}
 
 type Resource struct {
 	Type ResourceType
@@ -75,7 +51,18 @@ func NewPlant(p PlantType) *Plant {
 }
 
 func (t *Plant) Show() string {
-	return fmt.Sprintf("%s: %d", t.Type, t.Grown)
+	return fmt.Sprintf(" T%d", t.Grown/10)
+}
+
+func (t *Plant) Next() {
+	t.Grow()
+}
+
+func (t *Plant) Info() string {
+	return fmt.Sprintf(
+		"Type: %s\nGrown: %d / %d\n[h]: harvest, [x]: delete\n",
+		t.Type, t.Grown, t.MaxGrown,
+	)
 }
 
 func (t *Plant) Grow() {
