@@ -3,6 +3,7 @@ package webui
 import (
 	"os"
 	"testing"
+	"time"
 )
 
 func TestUI(t *testing.T) {
@@ -37,6 +38,9 @@ func TestUI(t *testing.T) {
 		NewRadioInput("radio2", "A"),
 		NewRadioInput("radio2", "B"),
 		NewRadioInput("radio2", "C"),
+		NewDateInput("date", time.Now(), time.Now().Add(-time.Hour*24*3)),
+		NewDateTimeInput("date", 60, time.Now(), time.Now().Add(-time.Hour*24*3)),
+		NewDateTimeInput("date", 3600, time.Now(), time.Now().Add(-time.Hour*24*3)),
 		NewSubmitBtn("submit", "submit1"),
 		NewSubmitBtn("cancel", "submit2"),
 	)

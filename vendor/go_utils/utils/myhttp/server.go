@@ -1,6 +1,7 @@
 package myhttp
 
 import (
+	"crypto/x509"
 	"fmt"
 	"go_utils/utils"
 	"net/http"
@@ -76,6 +77,51 @@ func TokenChecker(tokenKey string, allowedTokens []string, h http.HandlerFunc) h
 	}
 }
 
+func ClientTLSChecker(h http.HandlerFunc) http.HandlerFunc {
+	return func(ww http.ResponseWriter, rr *http.Request) {
+		// Check cert exists
+		if rr.TLS == nil {
+			ww.WriteHeader(http.StatusUnauthorized)
+			ww.Write([]byte("No certs provided"))
+			return
+		}
+		clientCert := rr.TLS.PeerCertificates
+		if len(clientCert) == 0 {
+			ww.WriteHeader(http.StatusUnauthorized)
+			ww.Write([]byte("No certs provided"))
+			return
+		}
+		// Check cert extKeyUsage
+		clientAuthFound := false
+		for _, u := range clientCert[0].ExtKeyUsage {
+			if u == x509.ExtKeyUsageClientAuth {
+				clientAuthFound = true
+				break
+			}
+		}
+		if !clientAuthFound {
+			ww.WriteHeader(http.StatusUnauthorized)
+			ww.Write([]byte("Cert doesn't have client auth ext"))
+			return
+		}
+		// Check IP SAN match
+		ipMatchFound := false
+		for _, ip := range clientCert[0].IPAddresses {
+			if ip.String() == strings.Split(rr.RemoteAddr, ":")[0] {
+				ipMatchFound = true
+				break
+			}
+		}
+		if !ipMatchFound {
+			ww.WriteHeader(http.StatusUnauthorized)
+			ww.Write([]byte("No match IP found"))
+			return
+		}
+
+		h(ww, rr)
+	}
+}
+
 func RunServers(s ...*MiniServer) {
 	var wg sync.WaitGroup
 
@@ -84,6 +130,7 @@ func RunServers(s ...*MiniServer) {
 	for _, v := range s {
 		go func(ss *MiniServer) {
 			ss.Serve()
+			utils.LogPrintWarning("Server has stopped serving: ", ss.ss.Addr)
 			wg.Done()
 		}(v)
 	}

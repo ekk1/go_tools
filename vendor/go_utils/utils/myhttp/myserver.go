@@ -1,8 +1,11 @@
 package myhttp
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"go_utils/utils"
 	"net/http"
+	"os"
 )
 
 type MiniServer struct {
@@ -55,4 +58,41 @@ func (s *MiniServer) Serve() {
 	}
 	utils.LogPrintInfo(s.name, "listening on", s.ss.Addr)
 	utils.LogPrintError(s.ss.ListenAndServe())
+}
+
+func (s *MiniServer) ServeTLS(certFile, keyFile string) {
+	s.ss = &http.Server{
+		Addr:    s.address + ":" + s.port,
+		Handler: s.mux,
+	}
+	utils.LogPrintInfo(s.name, "listening tls on", s.ss.Addr)
+	utils.LogPrintError(s.ss.ListenAndServeTLS(certFile, keyFile))
+}
+
+func (s *MiniServer) ServeMutualTLS(certFile, keyFile, caFile string) {
+	caCert, err := os.ReadFile(caFile)
+	if err != nil {
+		utils.LogPrintError("Failed to read ca file:", err)
+		return
+	}
+	caCertPool := x509.NewCertPool()
+	if ok := caCertPool.AppendCertsFromPEM(caCert); !ok {
+		utils.LogPrintError("Failed to add ca cert to pool: ", caFile)
+		return
+	}
+
+	tlsConfig := &tls.Config{
+		ClientCAs:  caCertPool,
+		ClientAuth: tls.RequireAndVerifyClientCert,
+	}
+	// This is deprecated
+	// tlsConfig.BuildNameToCertificate()
+
+	s.ss = &http.Server{
+		Addr:      s.address + ":" + s.port,
+		Handler:   s.mux,
+		TLSConfig: tlsConfig,
+	}
+	utils.LogPrintInfo(s.name, "listening mutual tls on", s.ss.Addr)
+	utils.LogPrintError(s.ss.ListenAndServeTLS(certFile, keyFile))
 }

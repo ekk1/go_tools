@@ -18,13 +18,14 @@ import (
 )
 
 type HTTPClient struct {
-	c        *http.Client
-	json     bool
-	form     bool
-	rawSend  bool
-	headers  http.Header
-	username string
-	password string
+	c                  *http.Client
+	json               bool
+	form               bool
+	rawSend            bool
+	headers            http.Header
+	username           string
+	password           string
+	DownloadBufferSize int64
 }
 
 func NewHTTPClient() *HTTPClient {
@@ -44,8 +45,9 @@ func NewHTTPClient() *HTTPClient {
 		Transport: ts,
 	}
 	return &HTTPClient{
-		c:       c,
-		headers: http.Header{},
+		c:                  c,
+		headers:            http.Header{},
+		DownloadBufferSize: 16 * 1024 * 1024,
 	}
 }
 
@@ -206,7 +208,11 @@ func (h *HTTPClient) SetCustomCert(certPath []string) error {
 	}
 	if didAddCert {
 		if ts, ok := h.c.Transport.(*http.Transport); ok {
-			ts.TLSClientConfig = &tls.Config{RootCAs: certPool}
+			if ts.TLSClientConfig != nil {
+				ts.TLSClientConfig.RootCAs = certPool
+			} else {
+				ts.TLSClientConfig = &tls.Config{RootCAs: certPool}
+			}
 		} else {
 			return errors.New("Failed to get transport")
 		}
@@ -214,8 +220,30 @@ func (h *HTTPClient) SetCustomCert(certPath []string) error {
 	return nil
 }
 
+// Usually when using client auth, server auth is also applied, so this function forces server tls auth
+func (h *HTTPClient) SetClientCert(certFile, keyFile string) error {
+	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
+	if err != nil {
+		utils.LogPrintError("Falied to load client cert: ", err)
+		return err
+	}
+	if ts, ok := h.c.Transport.(*http.Transport); ok {
+		if ts.TLSClientConfig != nil {
+			ts.TLSClientConfig.Certificates = []tls.Certificate{cert}
+		} else {
+			ts.TLSClientConfig = &tls.Config{
+				Certificates: []tls.Certificate{cert},
+			}
+		}
+	} else {
+		return errors.New("Failed to get transport")
+	}
+
+	return nil
+}
+
 func (h *HTTPClient) DownloadFile(url, downloadName string) (int64, error) {
-	var downloadBuffer []byte = make([]byte, 16*1024*1024)
+	var downloadBuffer []byte = make([]byte, h.DownloadBufferSize)
 	totalRead := int64(0)
 	totalWritten := int64(0)
 

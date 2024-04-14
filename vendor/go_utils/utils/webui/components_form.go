@@ -3,6 +3,8 @@ package webui
 import (
 	"fmt"
 	"go_utils/utils"
+	"strconv"
+	"time"
 )
 
 func NewForm(targetURL, name string, e ...WebUI) *Element {
@@ -65,5 +67,33 @@ func NewRadioInput(name, value string) *GroupElement {
 	return NewGroupElement(
 		NewInput(name, "radio", value, name+"-"+value),
 		NewLabel(value, name+"-"+value), NewBR(),
+	)
+}
+
+func NewDateInput(name string, maxDate, minData time.Time) *GroupElement {
+	curTime := time.Now()
+	curTimeStr := curTime.Format(time.DateOnly)
+	idSuffix := utils.RandomString(5)
+	dateInput := NewInput(name, "date", curTimeStr, name+"-"+idSuffix)
+	dateInput.SetAttr("max", maxDate.Format(time.DateOnly))
+	dateInput.SetAttr("min", minData.Format(time.DateOnly))
+	return NewGroupElement(
+		NewLabel(name, name+"-"+idSuffix),
+		dateInput, NewBR(),
+	)
+}
+
+// Step is second, default to 60
+func NewDateTimeInput(name string, step int64, maxDate, minData time.Time) *GroupElement {
+	curTime := time.Now()
+	curTimeStr := curTime.Format("2006-01-02T15:04:05")
+	idSuffix := utils.RandomString(5)
+	dateInput := NewInput(name, "datetime-local", curTimeStr, name+"-"+idSuffix)
+	dateInput.SetAttr("max", maxDate.Format("2006-01-02T15:04:05"))
+	dateInput.SetAttr("min", minData.Format("2006-01-02T15:04:05"))
+	dateInput.SetAttr("step", strconv.FormatInt(step, 10))
+	return NewGroupElement(
+		NewLabel(name, name+"-"+idSuffix),
+		dateInput, NewBR(),
 	)
 }
