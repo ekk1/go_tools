@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go_utils/utils"
 	"net/http"
+	"os"
 	"testing"
 	"time"
 )
@@ -145,4 +146,17 @@ func TestGenerateCerts(t *testing.T) {
 		t.Fatal(err)
 	}
 
+}
+
+func TestClearCerts(t *testing.T) {
+	for _, f := range []string{
+		"ca.crt",
+		"ca.key",
+		"server.crt",
+		"server.key",
+		"client.crt",
+		"client.key",
+	} {
+		os.Remove(f)
+	}
 }
