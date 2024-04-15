@@ -37,7 +37,7 @@ func main() {
 
 	fmt.Println("Finish generate map: ", GlobalMap.SizeX, GlobalMap.SizeY)
 
-	GlobalTicker = time.NewTicker(500 * time.Millisecond)
+	GlobalTicker = time.NewTicker(100 * time.Millisecond)
 	EventChannel = make(chan GameEvent)
 	ExitChannelInputLoop = make(chan byte)
 	ExitChannelRenderLoop = make(chan byte)
