@@ -54,15 +54,15 @@ func RenderLoop() {
 				}
 
 			case EventPlant:
-				fmt.Println("Waiting:")
-
 				PendingEventChannel <- PendingEventPlant
 				DrawWorld()
-				fmt.Println("Waiting:")
 				selection := <-PendingEventSelection
-				GlobalMap.Blocks[0][CurrentPosY][CurrentPosX].Plant(
-					GlobalItemConfigTable.PlantList[selection-48],
-				)
+				trueSelection := int(selection - 48)
+				if trueSelection > 0 && trueSelection < len(GlobalItemConfigTable.PlantList) {
+					GlobalMap.Blocks[0][CurrentPosY][CurrentPosX].Plant(
+						GlobalItemConfigTable.PlantList[trueSelection],
+					)
+				}
 			case EventGameStop:
 				ExitChannelRenderLoop <- 0
 			}
