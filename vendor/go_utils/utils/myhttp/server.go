@@ -66,6 +66,20 @@ func HandlerMaker(method []string, path string, h http.HandlerFunc) (string, htt
 	}
 }
 
+func HandlerMakerNoLog(method []string, path string, h http.HandlerFunc) (string, http.HandlerFunc) {
+	return path, func(ww http.ResponseWriter, rr *http.Request) {
+		if !ServerCheckPath(path, rr, ww) {
+			ServerError("Path error", ww, rr)
+			return
+		}
+		if !slices.Contains(method, rr.Method) {
+			ServerError("Expect "+strings.Join(method, ",")+" but got: "+rr.Method, ww, rr)
+			return
+		}
+		h(ww, rr)
+	}
+}
+
 func TokenChecker(tokenKey string, allowedTokens []string, h http.HandlerFunc) http.HandlerFunc {
 	return func(ww http.ResponseWriter, rr *http.Request) {
 		token := rr.Header.Get(tokenKey)

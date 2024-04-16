@@ -28,6 +28,9 @@ func NewServer(name, addr, port string) *MiniServer {
 func (s *MiniServer) AddRoute(path string, method []string, h http.HandlerFunc) {
 	s.mux.HandleFunc(HandlerMaker(method, path, h))
 }
+func (s *MiniServer) AddRouteNoLog(path string, method []string, h http.HandlerFunc) {
+	s.mux.HandleFunc(HandlerMakerNoLog(method, path, h))
+}
 
 func (s *MiniServer) AddREST(path string, h http.HandlerFunc) {
 	s.mux.HandleFunc(
