@@ -19,8 +19,11 @@ type City struct {
 
 	Population    int64
 	MaxPopulation int64
+	Food          int64
+	FoodConsume   int64
 
-	Food        int64
+	Gold int64
+
 	Storage     map[Resource]int64
 	StorageSize int64
 	StorageCap  int64
@@ -35,6 +38,14 @@ func (c *City) AddTeam(name string) {
 }
 
 func (c *City) AssignWorkingUnitsToBuilding(u Unit, num int64, b string) bool {
+	if curNum, ok := c.WorkingUnits[u]; ok && curNum >= num {
+		c.WorkingUnits[u] -= num
+		return c.Buildings[b].AssignUnit(u, num)
+	}
+	return false
+}
+
+func (c *City) RemoveWorkingUnitsToBuilding(u Unit, num int64, b string) bool {
 	if curNum, ok := c.WorkingUnits[u]; ok && curNum >= num {
 		c.WorkingUnits[u] -= num
 		return c.Buildings[b].AssignUnit(u, num)

@@ -12,8 +12,9 @@ const (
 )
 
 type ResourceConfig struct {
-	ResourceSize  map[Resource]int64
-	ResourceValue map[Resource]int64
+	ResourceSize      map[Resource]int64
+	ResourceValue     map[Resource]int64
+	ResourceMineSpeed map[Resource]float64
 }
 
 var GlobalResourceConfig = &ResourceConfig{
