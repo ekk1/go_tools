@@ -1,1 +1,52 @@
-{}
+{
+    "resource": {
+        "iron": {
+            "size": 1,
+            "value": 1,
+            "speed": 1
+        },
+        "copper": {
+            "size": 1,
+            "value": 1,
+            "speed": 1
+        },
+        "silver": {
+            "size": 1,
+            "value": 1,
+            "speed": 1
+        },
+        "gold": {
+            "size": 1,
+            "value": 1,
+            "speed": 1
+        },
+        "wood": {
+            "size": 1,
+            "value": 1,
+            "speed": 1
+        },
+        "corn": {
+            "size": 1,
+            "value": 1,
+            "speed": 1
+        }
+    },
+    "unit": {
+        "worker": {
+            "consume": 1,
+            "workspeed": 1,
+            "movespeed": 1,
+            "load": 10
+        }
+    },
+    "building": {
+        "farm": {
+            "resource": {
+                "wood": 1,
+                "iron": 1
+            },
+            "work": 10,
+            "maxunits": 2
+        }
+    }
+}

@@ -10,15 +10,3 @@ const (
 	ResourceWood   Resource = "wood"
 	ResourceCorn   Resource = "corn"
 )
-
-type ResourceConfig struct {
-	ResourceSize      map[Resource]int64
-	ResourceValue     map[Resource]int64
-	ResourceMineSpeed map[Resource]float64
-}
-
-var GlobalResourceConfig = &ResourceConfig{
-	ResourceSize: map[Resource]int64{
-		ResourceCorn: 1,
-	},
-}

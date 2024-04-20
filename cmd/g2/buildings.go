@@ -6,27 +6,45 @@ type Building interface {
 	Next()
 }
 
-type FarmCorpType string
+type BuildingName string
 
 const (
-	FarmCorpTypeCorn FarmCorpType = "corn"
+	BuildingNameFarm BuildingName = "farm"
 )
 
 // TODO: Finish farm
 type Farm struct {
 	ParentCity *City
 
-	Planting       FarmCorpType
+	Planting       Resource
 	MaxGrown       float64
 	GrowSpeed      float64
 	CurrentGrown   float64
 	ExpectedOutput float64
 
-	UnitNum  int64
-	MaxUnits int64
+	RemainConstructWorks float64
+	UnitNum              int64
+	UnitsList            map[Unit]int64
+	MaxUnits             int64
+}
+
+func NewFarm(c *City) *Farm {
+	return &Farm{
+		ParentCity:           c,
+		MaxUnits:             Config.Buildings.BuildingMaxWorkingUnits[BuildingNameFarm],
+		RemainConstructWorks: Config.Buildings.BuildingConstructWork[BuildingNameFarm],
+		UnitsList:            map[Unit]int64{},
+	}
 }
 
 func (f *Farm) Next() {
+	if f.RemainConstructWorks > 0 {
+		// f.RemainConstructWorks -= (float64(f.UnitNum) * )
+		for u, num := range f.UnitsList {
+			f.RemainConstructWorks -= (float64(num) * Config.Units.UnitWorkSpeed[u])
+		}
+		return
+	}
 	f.CurrentGrown += f.GrowSpeed
 	if f.CurrentGrown > f.MaxGrown {
 		f.CurrentGrown -= f.MaxGrown
@@ -39,7 +57,7 @@ func (f *Farm) AssignUnit(u Unit, num int64) bool {
 		return false
 	}
 	f.UnitNum += num
-	f.GrowSpeed += GlobalUnitConfig.UnitWorkSpeed[u] * float64(num)
+	f.GrowSpeed += Config.Units.UnitWorkSpeed[u] * float64(num)
 
 	return true
 }
