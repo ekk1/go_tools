@@ -9,7 +9,8 @@ type Building interface {
 type BuildingName string
 
 const (
-	BuildingNameFarm BuildingName = "farm"
+	BuildingNameFarm    BuildingName = "farm"
+	BuildingNameStorage BuildingName = "storage"
 )
 
 // TODO: Finish farm
@@ -52,12 +53,21 @@ func (f *Farm) Next() {
 	}
 }
 
+func (f *Farm) Plant(r Resource) {
+	f.Planting = r
+}
+
 func (f *Farm) AssignUnit(u Unit, num int64) bool {
 	if f.UnitNum+num > f.MaxUnits {
 		return false
 	}
 	f.UnitNum += num
 	f.GrowSpeed += Config.Units.UnitWorkSpeed[u] * float64(num)
+	if num, ok := f.UnitsList[u]; !ok {
+		f.UnitsList[u] = num
+	} else {
+		f.UnitsList[u] += num
+	}
 
 	return true
 }

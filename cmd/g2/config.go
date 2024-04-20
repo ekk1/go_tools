@@ -27,6 +27,7 @@ type ResourceConfig struct {
 	ResourceSize      map[Resource]int64   `json:"size"`
 	ResourceValue     map[Resource]int64   `json:"value"`
 	ResourceMineSpeed map[Resource]float64 `json:"speed"`
+	ResourceOutput    map[Resource]int64   `json:"output"`
 }
 
 type UnitConfig struct {

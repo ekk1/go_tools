@@ -3,32 +3,38 @@
         "iron": {
             "size": 1,
             "value": 1,
-            "speed": 1
+            "speed": 1,
+            "output": 1
         },
         "copper": {
             "size": 1,
             "value": 1,
-            "speed": 1
+            "speed": 1,
+            "output": 1
         },
         "silver": {
             "size": 1,
             "value": 1,
-            "speed": 1
+            "speed": 1,
+            "output": 1
         },
         "gold": {
             "size": 1,
             "value": 1,
-            "speed": 1
+            "speed": 1,
+            "output": 1
         },
         "wood": {
             "size": 1,
             "value": 1,
-            "speed": 1
+            "speed": 1,
+            "output": 1
         },
         "corn": {
             "size": 1,
             "value": 1,
-            "speed": 1
+            "speed": 1,
+            "output": 1
         }
     },
     "unit": {
