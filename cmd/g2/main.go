@@ -1,22 +1,21 @@
 package main
 
 import (
+	"go_tools/cmd/g2/config"
+	"go_tools/cmd/g2/event"
 	"go_utils/utils"
 	"go_utils/utils/myhttp"
 	"sync"
 	"time"
 )
 
-type PlayerEvent struct {
-}
-
 var (
-	GlobalEventChannel = make(chan *PlayerEvent, 100)
+	GlobalEventChannel = make(chan *event.PlayerEvent, 100)
 	GlobalTicker       = time.NewTicker(10 * time.Second)
 
 	ExitChannel = make(chan string)
 
-	GlobalCityList = map[string]*City{}
+	GlobalCityList = map[string]config.City{}
 )
 
 func RenderLoop() {
@@ -24,13 +23,14 @@ func RenderLoop() {
 		select {
 		case e := <-GlobalEventChannel:
 			utils.LogPrintInfo(e)
+			<-e.Finished
 		case <-GlobalTicker.C:
 			var wg sync.WaitGroup
 			wg.Add(len(GlobalCityList))
 			for n, c := range GlobalCityList {
 				utils.LogPrintInfo("Updating " + n)
 				go func() {
-					c.Next()
+					c.Update()
 					wg.Done()
 				}()
 			}
@@ -42,7 +42,7 @@ func RenderLoop() {
 
 func main() {
 	// Run main loop
-	InitConfig()
+	config.InitConfig()
 
 	go RenderLoop()
 

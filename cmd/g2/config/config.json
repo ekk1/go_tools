@@ -39,6 +39,7 @@
     },
     "unit": {
         "worker": {
+            "pop": 1,
             "consume": 1,
             "workspeed": 1,
             "movespeed": 1,
@@ -52,7 +53,20 @@
                 "iron": 1
             },
             "work": 10,
-            "maxunits": 2
+            "maxunits": 2,
+            "size": 1
+        }
+    },
+    "city": {
+        "normal": {
+            "resource": {
+                "wood": 1,
+                "iron": 1
+            },
+            "work": 10,
+            "population_cap": 10,
+            "storage_cap": 10,
+            "building_cap": 100            
         }
     }
 }

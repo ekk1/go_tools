@@ -1,4 +1,8 @@
-package main
+package maps
+
+import (
+	"go_tools/cmd/g2/config"
+)
 
 type Object interface {
 }
@@ -22,12 +26,12 @@ func NewMap(sizeX, sizeY int64) *Map {
 	return worldMap
 }
 
-func (m *Map) AddCity(coordX, coordY int64, city *City) {
+func (m *Map) AddCity(coordX, coordY int64, city *config.City) {
 	m.BlocksX[coordX] = city
 	m.BlocksY[coordY] = city
 }
 
-func (m *Map) AddResource(coordX, coordY int64, resouce Resource) {
-	m.BlocksX[coordX] = resouce
-	m.BlocksY[coordY] = resouce
+func (m *Map) AddResource(coordX, coordY int64, resource config.ResourceType) {
+	m.BlocksX[coordX] = resource
+	m.BlocksY[coordY] = resource
 }

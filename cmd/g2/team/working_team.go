@@ -1,19 +1,13 @@
-package main
+package team
 
-type Unit string
-
-const (
-	UnitTypeWorker Unit = "worker"
+import (
+	"go_tools/cmd/g2/config"
 )
-
-type Team interface {
-	Next()
-}
 
 type WorkingTeam struct {
 	TargetCoordX   int64
 	TargetCoordY   int64
-	TargetResource Resource
+	TargetResource config.ResourceType
 
 	TargetDistance  float64
 	TeamMoveSpeed   float64
@@ -25,6 +19,6 @@ type WorkingTeam struct {
 	TeamFoodNum     int64
 }
 
-func (t *WorkingTeam) Next() {
+func (t *WorkingTeam) Update() {
 
 }
