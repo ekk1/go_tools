@@ -30,6 +30,10 @@ type NormalCity struct {
 	Storage       map[config.ResourceType]int64
 	CurrentStored int64
 	MaxStorageCap int64
+
+	// string is "coordX,coordY"
+	NearbyResources map[string]config.ResourceType
+	MaxScanRange    int64
 }
 
 func (c *NormalCity) AddBuilding(name string, bType config.BuildingType) {
@@ -72,6 +76,10 @@ func (c *NormalCity) AddResource(r config.ResourceType, num int64) bool {
 		c.CurrentStored += pendingResourceSize
 	}
 	return true
+}
+
+func (c *NormalCity) ScanResources() {
+
 }
 
 func (c *NormalCity) Update() {

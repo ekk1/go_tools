@@ -48,6 +48,8 @@ type BuildingConfig struct {
 type CityConfig struct {
 	CityConstructResources map[CityType]map[ResourceType]int64 `json:"resource"`
 	CityConstructWork      map[CityType]float64                `json:"work"`
-	CityMaxPopulation      map[CityType]int64                  `json:"population"`
-	CityStorageCap         map[CityType]int64                  `json:"cap"`
+	CityMaxPopulation      map[CityType]int64                  `json:"population_cap"`
+	CityStorageCap         map[CityType]int64                  `json:"storage_cap"`
+	CityBuildingCap        map[CityType]int64                  `json:"building_cap"`
+	CityScanRange          map[CityType]int64                  `json:"scan_range"`
 }
