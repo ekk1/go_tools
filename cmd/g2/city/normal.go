@@ -3,6 +3,7 @@ package city
 import (
 	"go_tools/cmd/g2/building"
 	"go_tools/cmd/g2/config"
+	"go_tools/cmd/g2/event"
 	"go_tools/cmd/g2/team"
 	"go_utils/utils"
 )
@@ -91,4 +92,16 @@ func (c *NormalCity) Update() {
 		utils.LogPrintDebug(c.UUID, "working on", n)
 		t.Update()
 	}
+}
+
+func (c *NormalCity) Actions() []string {
+	return []string{}
+}
+
+func (c *NormalCity) Info() string {
+	return ""
+}
+
+func (c *NormalCity) Execute(e *event.PlayerEvent) string {
+	return ""
 }

@@ -2,6 +2,7 @@ package team
 
 import (
 	"go_tools/cmd/g2/config"
+	"go_tools/cmd/g2/event"
 )
 
 type WorkingTeam struct {
@@ -21,4 +22,16 @@ type WorkingTeam struct {
 
 func (t *WorkingTeam) Update() {
 
+}
+
+func (t *WorkingTeam) Actions() []string {
+	return []string{}
+}
+
+func (t *WorkingTeam) Execute(p *event.PlayerEvent) string {
+	return "OK"
+}
+
+func (t *WorkingTeam) Info() string {
+	return ""
 }

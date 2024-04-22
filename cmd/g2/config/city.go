@@ -1,7 +1,12 @@
 package config
 
+import "go_tools/cmd/g2/event"
+
 type City interface {
 	AddResource(r ResourceType, num int64) bool
+	Info() string
+	Actions() []string
+	Execute(p *event.PlayerEvent) string
 	Update()
 }
 

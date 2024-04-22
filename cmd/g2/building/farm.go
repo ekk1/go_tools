@@ -2,6 +2,7 @@ package building
 
 import (
 	"go_tools/cmd/g2/config"
+	"go_tools/cmd/g2/event"
 )
 
 type Farm struct {
@@ -36,10 +37,12 @@ func (f *Farm) Update() {
 		}
 		return
 	}
-	f.CurrentGrown += f.GrowSpeed
 	if f.CurrentGrown > f.MaxGrown {
-		f.CurrentGrown -= f.MaxGrown
-		// Output to parent city's storage
+		if f.ParentCity.AddResource(f.Planting, f.ExpectedOutput) {
+			f.CurrentGrown -= f.MaxGrown
+		}
+	} else {
+		f.CurrentGrown += f.GrowSpeed
 	}
 }
 
@@ -65,16 +68,19 @@ func (f *Farm) AssignUnit(u config.UnitType, num int64) bool {
 }
 
 func (f *Farm) RemoveUnit(u config.UnitType, num int64) bool {
-	// if f.UnitNum+num > f.MaxUnits {
-	// 	return false
-	// }
-	// f.UnitNum += num
-	// f.GrowSpeed += Config.Units.UnitWorkSpeed[u] * float64(num)
-	// if num, ok := f.UnitsList[u]; !ok {
-	// 	f.UnitsList[u] = num
-	// } else {
-	// 	f.UnitsList[u] += num
-	// }
-
 	return true
+}
+
+func (f *Farm) Actions() []string {
+	return []string{
+		"Plant",
+	}
+}
+
+func (f *Farm) Execute(e *event.PlayerEvent) string {
+	return ""
+}
+
+func (f *Farm) Info() string {
+	return ""
 }

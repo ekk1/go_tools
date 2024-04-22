@@ -1,0 +1,11 @@
+html {
+    font-family: monospace;
+    height: 100%;
+}
+
+
+.gameboard {
+    background-color: aliceblue;
+    height: 100%;
+    width: 100%;
+}
