@@ -3,6 +3,7 @@ package config
 import "go_tools/cmd/g2/event"
 
 type City interface {
+	AssignUnit(u UnitType, num int64) bool
 	AddResource(r ResourceType, num int64) bool
 	Info() string
 	Actions() []string

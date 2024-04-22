@@ -23,8 +23,8 @@ type Farm struct {
 func NewFarm(c config.City) *Farm {
 	return &Farm{
 		ParentCity:           c,
-		MaxUnits:             config.Config.Buildings.BuildingMaxWorkingUnits[config.BuildingTypeFarm],
-		RemainConstructWorks: config.Config.Buildings.BuildingConstructWork[config.BuildingTypeFarm],
+		MaxUnits:             config.Config.Buildings[config.BuildingTypeFarm].BuildingMaxWorkingUnits,
+		RemainConstructWorks: config.Config.Buildings[config.BuildingTypeFarm].BuildingConstructWork,
 		UnitsList:            map[config.UnitType]int64{},
 	}
 }
@@ -33,7 +33,7 @@ func (f *Farm) Update() {
 	if f.RemainConstructWorks > 0 {
 		// f.RemainConstructWorks -= (float64(f.UnitNum) * )
 		for u, num := range f.UnitsList {
-			f.RemainConstructWorks -= (float64(num) * config.Config.Units.UnitWorkSpeed[u])
+			f.RemainConstructWorks -= (float64(num) * config.Config.Units[u].UnitWorkSpeed)
 		}
 		return
 	}
@@ -48,7 +48,7 @@ func (f *Farm) Update() {
 
 func (f *Farm) Plant(r config.ResourceType) {
 	f.Planting = r
-	f.ExpectedOutput = config.Config.Resources.ResourceOutput[r]
+	f.ExpectedOutput = config.Config.Resources[r].ResourceOutput
 	f.CurrentGrown = 0
 }
 
@@ -57,8 +57,8 @@ func (f *Farm) AssignUnit(u config.UnitType, num int64) bool {
 		return false
 	}
 	f.UnitNum += num
-	f.GrowSpeed += config.Config.Units.UnitWorkSpeed[u] * float64(num)
-	if num, ok := f.UnitsList[u]; !ok {
+	f.GrowSpeed += config.Config.Units[u].UnitWorkSpeed * float64(num)
+	if _, ok := f.UnitsList[u]; !ok {
 		f.UnitsList[u] = num
 	} else {
 		f.UnitsList[u] += num

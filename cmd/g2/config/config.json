@@ -60,12 +60,12 @@
     "city": {
         "normal": {
             "resource": {
-                "wood": 1,
-                "iron": 1
+                "wood": 1000,
+                "iron": 1000
             },
-            "work": 10,
-            "population_cap": 10,
-            "storage_cap": 10,
+            "work": 2000,
+            "population_cap": 20,
+            "storage_cap": 500,
             "building_cap": 100,
             "scan_range": 3        
         }

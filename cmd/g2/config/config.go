@@ -6,9 +6,10 @@ import (
 )
 
 type GlobalConfig struct {
-	Resources *ResourceConfig `json:"resource"`
-	Units     *UnitConfig     `json:"unit"`
-	Buildings *BuildingConfig `json:"building"`
+	Resources map[ResourceType]*ResourceConfig `json:"resource"`
+	Units     map[UnitType]*UnitConfig         `json:"unit"`
+	Buildings map[BuildingType]*BuildingConfig `json:"building"`
+	Cities    map[CityType]*CityConfig         `json:"city"`
 }
 
 var Config *GlobalConfig
@@ -24,32 +25,32 @@ func InitConfig() {
 }
 
 type ResourceConfig struct {
-	ResourceSize      map[ResourceType]int64   `json:"size"`
-	ResourceValue     map[ResourceType]int64   `json:"value"`
-	ResourceMineSpeed map[ResourceType]float64 `json:"speed"`
-	ResourceOutput    map[ResourceType]int64   `json:"output"`
+	ResourceSize      int64   `json:"size"`
+	ResourceValue     int64   `json:"value"`
+	ResourceMineSpeed float64 `json:"speed"`
+	ResourceOutput    int64   `json:"output"`
 }
 
 type UnitConfig struct {
-	UnitPopulation     map[UnitType]int64   `json:"pop"`
-	UnitConsumeFood    map[UnitType]int64   `json:"consume"`
-	UnitWorkSpeed      map[UnitType]float64 `json:"workspeed"`
-	UnitMoveSpeed      map[UnitType]float64 `json:"movespeed"`
-	UnitLoadCapability map[UnitType]float64 `json:"load"`
+	UnitPopulation     int64   `json:"pop"`
+	UnitConsumeFood    int64   `json:"consume"`
+	UnitWorkSpeed      float64 `json:"workspeed"`
+	UnitMoveSpeed      float64 `json:"movespeed"`
+	UnitLoadCapability float64 `json:"load"`
 }
 
 type BuildingConfig struct {
-	BuildingConstructResources map[BuildingType]map[ResourceType]int64 `json:"resource"`
-	BuildingConstructWork      map[BuildingType]float64                `json:"work"`
-	BuildingMaxWorkingUnits    map[BuildingType]int64                  `json:"maxunits"`
-	BuildingSize               map[BuildingType]int64                  `json:"size"`
+	BuildingConstructResources map[ResourceType]int64 `json:"resource"`
+	BuildingConstructWork      float64                `json:"work"`
+	BuildingMaxWorkingUnits    int64                  `json:"maxunits"`
+	BuildingSize               int64                  `json:"size"`
 }
 
 type CityConfig struct {
-	CityConstructResources map[CityType]map[ResourceType]int64 `json:"resource"`
-	CityConstructWork      map[CityType]float64                `json:"work"`
-	CityMaxPopulation      map[CityType]int64                  `json:"population_cap"`
-	CityStorageCap         map[CityType]int64                  `json:"storage_cap"`
-	CityBuildingCap        map[CityType]int64                  `json:"building_cap"`
-	CityScanRange          map[CityType]int64                  `json:"scan_range"`
+	CityConstructResources map[ResourceType]int64 `json:"resource"`
+	CityConstructWork      float64                `json:"work"`
+	CityMaxPopulation      int64                  `json:"population_cap"`
+	CityStorageCap         int64                  `json:"storage_cap"`
+	CityBuildingCap        int64                  `json:"building_cap"`
+	CityScanRange          int64                  `json:"scan_range"`
 }
