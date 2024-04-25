@@ -1,6 +1,7 @@
 package building
 
 import (
+	"fmt"
 	"go_tools/cmd/g2/config"
 	"go_tools/cmd/g2/event"
 )
@@ -34,7 +35,13 @@ func (f *Farm) Update() {
 		// f.RemainConstructWorks -= (float64(f.UnitNum) * )
 		for u, num := range f.UnitsList {
 			f.RemainConstructWorks -= (float64(num) * config.Config.Units[u].UnitWorkSpeed)
+			if f.RemainConstructWorks < 0 {
+				f.RemainConstructWorks = 0
+			}
 		}
+		return
+	}
+	if f.Planting == "" {
 		return
 	}
 	if f.CurrentGrown > f.MaxGrown {
@@ -42,7 +49,7 @@ func (f *Farm) Update() {
 			f.CurrentGrown -= f.MaxGrown
 		}
 	} else {
-		f.CurrentGrown += f.GrowSpeed
+		f.CurrentGrown += f.GrowSpeed * config.Config.Resources[f.Planting].ResourceMineSpeed
 	}
 }
 
@@ -50,6 +57,7 @@ func (f *Farm) Plant(r config.ResourceType) {
 	f.Planting = r
 	f.ExpectedOutput = config.Config.Resources[r].ResourceOutput
 	f.CurrentGrown = 0
+	f.MaxGrown = float64(config.Config.Resources[r].ResourceValue)
 }
 
 func (f *Farm) AssignUnit(u config.UnitType, num int64) bool {
@@ -78,9 +86,28 @@ func (f *Farm) Actions() []string {
 }
 
 func (f *Farm) Execute(e *event.PlayerEvent) string {
+	if e.ActionType != event.PlayerEventTypeBuilding {
+		return "Error: not supported action type"
+	}
+	switch e.Command {
+	case "plant":
+		if _, ok := config.Config.Resources[config.ResourceType(e.Param1)]; !ok {
+			return "Building not supported"
+		}
+		f.Plant(config.ResourceType(e.Param1))
+		return "Planted " + e.Param1
+	}
 	return ""
 }
 
 func (f *Farm) Info() string {
-	return ""
+	ret := ""
+	ret += fmt.Sprintf("Planting: %s Grown/Max/Speed: %f/%f/%f\n",
+		f.Planting, f.CurrentGrown, f.MaxGrown, f.GrowSpeed,
+	)
+	if f.RemainConstructWorks != 0 {
+		ret += fmt.Sprintf("RemainWork:	%f\n", f.RemainConstructWorks)
+	}
+	ret += fmt.Sprintf("Worker/Max: %d/%d\n", f.UnitNum, f.MaxUnits)
+	return ret
 }

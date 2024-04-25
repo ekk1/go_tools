@@ -7,6 +7,7 @@ import (
 	"go_tools/cmd/g2/event"
 	"go_tools/cmd/g2/team"
 	"go_utils/utils"
+	"strconv"
 )
 
 type NormalCity struct {
@@ -65,14 +66,18 @@ func NewCityNoWork(name string, x, y int64) *NormalCity {
 	return c
 }
 
-func (c *NormalCity) AddBuilding(name string, bType config.BuildingType) {
+func (c *NormalCity) AddBuilding(name string, bType config.BuildingType) bool {
 	// c.Buildings[name] = b
+	if c.MaxBuildingSize-c.CurrentBuildingSize < config.Config.Buildings[bType].BuildingSize {
+		return false
+	}
 	switch bType {
 	case config.BuildingTypeFarm:
 		f := building.NewFarm(c)
 		c.Buildings[name] = f
-		// c.CurrentBuildingSize +=
+		c.CurrentBuildingSize += config.Config.Buildings[bType].BuildingSize
 	}
+	return true
 }
 
 func (c *NormalCity) AddTeam(name string) {
@@ -96,14 +101,13 @@ func (c *NormalCity) RemoveWorkingUnitsToBuilding(u config.UnitType, num int64, 
 }
 
 func (c *NormalCity) AddResource(r config.ResourceType, num int64) bool {
+	utils.LogPrintDebug("Adding", r, num)
 	pendingResourceSize := config.Config.Resources[r].ResourceSize * num
 	if pendingResourceSize+c.CurrentStored > c.MaxStorageCap {
 		return false
 	}
-	if _, ok := c.Storage[r]; ok {
-		c.Storage[r] += num
-		c.CurrentStored += pendingResourceSize
-	}
+	c.Storage[r] += num
+	c.CurrentStored += pendingResourceSize
 	return true
 }
 
@@ -112,7 +116,7 @@ func (c *NormalCity) AssignUnit(u config.UnitType, num int64) bool {
 		return false
 	}
 	c.CurrentPopulation += num
-	c.FoodConsume += config.Config.Units[u].UnitConsumeFood
+	c.FoodConsume += config.Config.Units[u].UnitConsumeFood * num
 	if _, ok := c.WorkingUnits[u]; !ok {
 		c.WorkingUnits[u] = num
 	} else {
@@ -126,20 +130,24 @@ func (c *NormalCity) ScanResources() {
 }
 
 func (c *NormalCity) Update() {
-	if c.RemainConstructWorks > 0 {
-		for u, num := range c.WorkingUnits {
-			c.RemainConstructWorks -= (float64(num) * config.Config.Units[u].UnitWorkSpeed)
-		}
-		return
-	}
-
-	if c.Food < 0 {
+	if c.Food < 0 { // City no enough food, stop working
+		// Add function for workers to starve ?
 		return
 	}
 
 	c.Food -= c.FoodConsume
 	if c.Food < 0 {
 		c.Food = 0
+	}
+
+	if c.RemainConstructWorks > 0 { // City not finished building, skip
+		for u, num := range c.WorkingUnits {
+			c.RemainConstructWorks -= (float64(num) * config.Config.Units[u].UnitWorkSpeed)
+			if c.RemainConstructWorks < 0 {
+				c.RemainConstructWorks = 0
+			}
+		}
+		return
 	}
 
 	for n, b := range c.Buildings {
@@ -158,24 +166,58 @@ func (c *NormalCity) Actions() []string {
 
 func (c *NormalCity) Info() string {
 	ret := ""
-	ret += fmt.Sprintf("CityType:	%s\n", config.CityTypeNormal)
-	ret += fmt.Sprintf("UUID: 		%s\n", c.UUID)
-	ret += fmt.Sprintf("CoordX: 	%d\n", c.CoordX)
-	ret += fmt.Sprintf("CoordY: 	%d\n", c.CoordY)
-	ret += fmt.Sprintf("RemainWork: %f\n", c.RemainConstructWorks)
-	ret += fmt.Sprintf("Buildings: 	%d\n", c.CurrentBuildingSize)
-	ret += fmt.Sprintf("MaxBuilds: 	%d\n", c.MaxBuildingSize)
-	ret += fmt.Sprintf("Population: %d\n", c.CurrentPopulation)
-	ret += fmt.Sprintf("MaxPop: 	%d\n", c.MaxPopulation)
+	ret += fmt.Sprintf("CityType: %s	Name: %s\n", config.CityTypeNormal, c.UUID)
+	ret += fmt.Sprintf("Coord: x: %d y: %d\n", c.CoordX, c.CoordY)
+	if c.RemainConstructWorks != 0 {
+		ret += fmt.Sprintf("RemainWork: %f\n", c.RemainConstructWorks)
+	}
+	ret += fmt.Sprintf("Buildings: 	%d/%d\n", c.CurrentBuildingSize, c.MaxBuildingSize)
+	ret += fmt.Sprintf("Population: %d/%d\n", c.CurrentPopulation, c.MaxPopulation)
 	ret += fmt.Sprintf("Units: 		%v\n", c.WorkingUnits)
-	ret += fmt.Sprintf("Food: 		%d\n", c.Food)
-	ret += fmt.Sprintf("FoodRate: 	%d\n", c.FoodConsume)
+	ret += fmt.Sprintf("Units: 		%v\n", c.Storage)
+	ret += fmt.Sprintf("Food: 		%d(-%d)\n", c.Food, c.FoodConsume)
 	ret += fmt.Sprintf("Gold: 		%d\n", c.Gold)
-	ret += fmt.Sprintf("Stored: 	%d\n", c.CurrentStored)
-	ret += fmt.Sprintf("MaxStore: 	%d\n", c.MaxStorageCap)
+	ret += fmt.Sprintf("Stored: 	%d/%d\n", c.CurrentStored, c.MaxStorageCap)
+	for n, b := range c.Buildings {
+		ret += fmt.Sprintf("Building: %s\n", n)
+		ret += fmt.Sprintf("%s\n", b.Info())
+	}
 	return ret
 }
 
 func (c *NormalCity) Execute(e *event.PlayerEvent) string {
+	switch e.ActionType {
+	case event.PlayerEventTypeCity:
+		switch e.Command {
+		case "build":
+			if _, ok := config.Config.Buildings[config.BuildingType(e.Param2)]; !ok {
+				return "Building not supported"
+			}
+			if !c.AddBuilding(e.Param1, config.BuildingType(e.Param2)) {
+				return "No enough space"
+			}
+			return "Started building " + e.Param2 + " Name: " + e.Param1
+		case "assign_unit_to_building":
+			if _, ok := c.WorkingUnits[config.UnitType(e.Param1)]; !ok {
+				return "No " + e.Param1 + " availiable"
+			}
+			if _, ok := c.Buildings[e.Param3]; !ok {
+				return "Building " + e.Param3 + " not exists"
+			}
+			num, err := strconv.ParseInt(e.Param2, 10, 64)
+			if err != nil {
+				return "Cannot parse " + e.Param2 + " as int"
+			}
+
+			if c.AssignWorkingUnitsToBuilding(config.UnitType(e.Param1), num, e.Param3) {
+				return "Assigned " + e.Param2 + " " + e.Param1 + " to " + e.Param3
+			}
+			return "failed"
+		}
+	case event.PlayerEventTypeBuilding:
+		if b, ok := c.Buildings[e.TargetName]; ok {
+			return b.Execute(e)
+		}
+	}
 	return ""
 }
