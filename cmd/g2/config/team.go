@@ -7,6 +7,7 @@ type Team interface {
 	Actions() []string
 	Execute(p *event.PlayerEvent) string
 	Update()
+	AssignUnit(u UnitType, num int64) bool
 }
 
 type TeamType string

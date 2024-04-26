@@ -13,6 +13,7 @@ import (
 const (
 	CityCommandBuild                = "build"
 	CityCommandAssignUnitToBuilding = "assign_unit_to_building"
+	CityCommandAssignUnitToTeam     = "assign_unit_to_team"
 )
 
 type NormalCity struct {
@@ -88,8 +89,12 @@ func (c *NormalCity) AddBuilding(name string, bType config.BuildingType) bool {
 	return true
 }
 
-func (c *NormalCity) AddTeam(name string) {
+func (c *NormalCity) AddTeam(name string) bool {
+	if _, ok := c.WorkingTeams[name]; ok {
+		return false
+	}
 	c.WorkingTeams[name] = &team.WorkingTeam{}
+	return true
 }
 
 func (c *NormalCity) AssignWorkingUnitsToBuilding(u config.UnitType, num int64, b string) bool {
@@ -100,7 +105,7 @@ func (c *NormalCity) AssignWorkingUnitsToBuilding(u config.UnitType, num int64, 
 	return false
 }
 
-func (c *NormalCity) RemoveWorkingUnitsToBuilding(u config.UnitType, num int64, b string) bool {
+func (c *NormalCity) RemoveWorkingUnitsFromBuilding(u config.UnitType, num int64, b string) bool {
 	if curNum, ok := c.WorkingUnits[u]; ok && curNum >= num {
 		c.WorkingUnits[u] -= num
 		return c.Buildings[b].AssignUnit(u, num)
@@ -218,6 +223,22 @@ func (c *NormalCity) Execute(e *event.PlayerEvent) string {
 			}
 
 			if c.AssignWorkingUnitsToBuilding(config.UnitType(e.Param1), num, e.Param3) {
+				return "Assigned " + e.Param2 + " " + e.Param1 + " to " + e.Param3
+			}
+			return "failed"
+		case CityCommandAssignUnitToTeam:
+			if _, ok := c.WorkingUnits[config.UnitType(e.Param1)]; !ok {
+				return "No " + e.Param1 + " availiable"
+			}
+			if _, ok := c.WorkingTeams[e.Param3]; !ok {
+				return "Team " + e.Param3 + " not exists"
+			}
+			num, err := strconv.ParseInt(e.Param2, 10, 64)
+			if err != nil {
+				return "Cannot parse " + e.Param2 + " as int"
+			}
+
+			if c.WorkingTeams[e.Param3].AssignUnit(config.UnitType(e.Param1), num) {
 				return "Assigned " + e.Param2 + " " + e.Param1 + " to " + e.Param3
 			}
 			return "failed"

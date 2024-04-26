@@ -18,6 +18,10 @@ type WorkingTeam struct {
 	TeamLoadCap     int64
 	TeamFoodConsume int64
 	TeamFoodNum     int64
+
+	TeamMaxUnitNum int64
+	TeamUnitNum    int64
+	TeamUnits      map[config.UnitType]int64
 }
 
 func (t *WorkingTeam) Update() {
@@ -34,4 +38,19 @@ func (t *WorkingTeam) Execute(p *event.PlayerEvent) string {
 
 func (t *WorkingTeam) Info() string {
 	return ""
+}
+
+func (t *WorkingTeam) AssignUnit(u config.UnitType, num int64) bool {
+	if t.TeamUnitNum+num > t.TeamMaxUnitNum {
+		return false
+	}
+	t.TeamUnitNum += num
+	t.TeamFoodConsume += config.Config.Units[u].UnitConsumeFood * num
+
+	if _, ok := t.TeamUnits[u]; !ok {
+		t.TeamUnits[u] = num
+	} else {
+		t.TeamUnits[u] += num
+	}
+	return true
 }
