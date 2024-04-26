@@ -6,10 +6,12 @@ import (
 )
 
 type GlobalConfig struct {
-	Resources map[ResourceType]*ResourceConfig `json:"resource"`
-	Units     map[UnitType]*UnitConfig         `json:"unit"`
-	Buildings map[BuildingType]*BuildingConfig `json:"building"`
-	Cities    map[CityType]*CityConfig         `json:"city"`
+	BuildingList []BuildingType                   `json:"build_list"`
+	PlantList    []ResourceType                   `json:"plant_list"`
+	Resources    map[ResourceType]*ResourceConfig `json:"resource"`
+	Units        map[UnitType]*UnitConfig         `json:"unit"`
+	Buildings    map[BuildingType]*BuildingConfig `json:"building"`
+	Cities       map[CityType]*CityConfig         `json:"city"`
 }
 
 var Config *GlobalConfig

@@ -6,6 +6,10 @@ import (
 	"go_tools/cmd/g2/event"
 )
 
+const (
+	FarmCommandPlant = "plant"
+)
+
 type Farm struct {
 	ParentCity config.City
 
@@ -90,7 +94,7 @@ func (f *Farm) Execute(e *event.PlayerEvent) string {
 		return "Error: not supported action type"
 	}
 	switch e.Command {
-	case "plant":
+	case FarmCommandPlant:
 		if _, ok := config.Config.Resources[config.ResourceType(e.Param1)]; !ok {
 			return "Building not supported"
 		}

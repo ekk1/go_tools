@@ -1,11 +1,117 @@
 html {
     font-family: monospace;
-    height: 100%;
+    font-size: large;
 }
 
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+}
 
-.gameboard {
-    background-color: aliceblue;
+div {
+    padding: 10px;
+    margin: 5px;
+}
+
+table {
+    margin-top: 20px;
+}
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+th, td {
+    padding: 5px;
+    border: 1px solid #ddd;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}
+tr:hover {background-color: #ddd;}
+th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #04AA6D;
+    color: white;
+}
+  
+input {
+    margin: 8px;
+    font-family: monospace;
+    background-color: rgba(255, 250, 240, 0.4);
+    border: 1px solid;
+    border-radius: 20px;
+    padding: 2px 12px 2px;
+}
+fieldset {
+    border: 1.5px groove rgba(169,169,169,0.3);
+    border-radius: 15px;
+}
+
+.btn {
+    color: black;
+    margin: 5px;
+    font-family: monospace;
+    background-color: rgba(0,0,0,0);
+    border: 2px solid;
+    border-color: rgba(0,0,0,0.5);
+    border-radius: 15px;
+    padding: 6px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    transition: 0.4s;
+}
+.btn:hover {
+    background-color: #04AA6D;
+    border-color: rgba(0,0,0,0);
+    color: white;
+}
+
+.content-card {
+    background-color: rgba(220,220,220,0.4);
+    border-radius: 30px;
+    padding: 10px 30px 25px;
+}
+
+.ccdiv {
+    display: block;
+    padding: 15px;
     height: 100%;
     width: 100%;
 }
+
+.gameboard {
+    border-radius: 30px;
+    background-color: rgba(0, 255, 127, 0.1);
+}
+
+[class*="div-"] { grid-column: span 1; }
+@media screen and (min-width: 600px) {
+    .ccdiv {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        .div-third { grid-column: span 3; }
+        .div-half { grid-column: span 6; }
+        .div-full { grid-column: span 6; }
+    }
+}
+@media screen and (min-width: 768px) {
+    .ccdiv {
+        grid-template-columns: repeat(8, 1fr);
+        .div-third { grid-column: span 3; }
+        .div-half { grid-column: span 4; }
+        .div-full { grid-column: span 8; }
+    }
+}
+@media screen and (min-width: 1200px) {
+    .ccdiv {
+        grid-template-columns: repeat(12, 1fr);
+        .div-third { grid-column: span 4; }
+        .div-half { grid-column: span 6; }
+        .div-full { grid-column: span 12; }
+    }
+}
+  

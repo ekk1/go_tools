@@ -10,6 +10,11 @@ import (
 	"strconv"
 )
 
+const (
+	CityCommandBuild                = "build"
+	CityCommandAssignUnitToBuilding = "assign_unit_to_building"
+)
+
 type NormalCity struct {
 	UUID   string
 	CoordX int64
@@ -68,6 +73,9 @@ func NewCityNoWork(name string, x, y int64) *NormalCity {
 
 func (c *NormalCity) AddBuilding(name string, bType config.BuildingType) bool {
 	// c.Buildings[name] = b
+	if _, ok := c.Buildings[name]; ok {
+		return false
+	}
 	if c.MaxBuildingSize-c.CurrentBuildingSize < config.Config.Buildings[bType].BuildingSize {
 		return false
 	}
@@ -161,7 +169,7 @@ func (c *NormalCity) Update() {
 }
 
 func (c *NormalCity) Actions() []string {
-	return []string{}
+	return []string{CityCommandBuild, CityCommandAssignUnitToBuilding}
 }
 
 func (c *NormalCity) Info() string {
@@ -189,15 +197,15 @@ func (c *NormalCity) Execute(e *event.PlayerEvent) string {
 	switch e.ActionType {
 	case event.PlayerEventTypeCity:
 		switch e.Command {
-		case "build":
+		case CityCommandBuild:
 			if _, ok := config.Config.Buildings[config.BuildingType(e.Param2)]; !ok {
 				return "Building not supported"
 			}
 			if !c.AddBuilding(e.Param1, config.BuildingType(e.Param2)) {
-				return "No enough space"
+				return "No enough space or duplicated building name"
 			}
 			return "Started building " + e.Param2 + " Name: " + e.Param1
-		case "assign_unit_to_building":
+		case CityCommandAssignUnitToBuilding:
 			if _, ok := c.WorkingUnits[config.UnitType(e.Param1)]; !ok {
 				return "No " + e.Param1 + " availiable"
 			}

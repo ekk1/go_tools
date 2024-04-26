@@ -1,4 +1,5 @@
 {
+    "plant_list": ["corn"],
     "resource": {
         "iron": {
             "size": 1,
@@ -49,6 +50,7 @@
             "load": 10
         }
     },
+    "build_list": ["farm"],
     "building": {
         "farm": {
             "resource": {
