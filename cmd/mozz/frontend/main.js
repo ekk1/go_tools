@@ -37,8 +37,8 @@ function refreshAccounts() {
                 _tr.appendChild(_td);
                 document.getElementById("account-list").appendChild(_tr);
             }
-        } else {
-            alert(xhr.responseText);
+        } else if (xhr.readyState == 4 && xhr.status != 200) {
+            alert(xhr.status, xhr.responseText);
         }
     }
     xhr.send();
@@ -53,8 +53,8 @@ function AddAccounts() {
     xhr.onreadystatechange = function () {
         if (xhr.readyState == 4 && xhr.status == 200) {
             refreshAccounts();
-        } else {
-            alert(xhr.responseText);
+        } else if (xhr.readyState == 4 && xhr.status != 200) {
+            alert(xhr.status, xhr.responseText);
         }
     }
     xhr.send(JSON.stringify({ name: name, initial_balance: Number(initial_balance) }));
