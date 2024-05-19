@@ -9,6 +9,13 @@ import (
 	"time"
 )
 
+func TestSince(t *testing.T) {
+	t1 := time.Now()
+	time.Sleep(3 * time.Second)
+	t2 := time.Since(t1)
+	t.Log(t2)
+}
+
 func TestServer(t *testing.T) {
 	s := NewServer("ss", "127.0.0.1", "10001")
 	s.mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) { w.Write([]byte("Hello")) })
@@ -31,7 +38,7 @@ func TestServer(t *testing.T) {
 				return
 			}
 		}
-		t2 := time.Now().Sub(t1)
+		t2 := time.Since(t1)
 		utils.LogPrintInfo(fmt.Sprintf("HTTP Speed: %.2f/s", float64(totalReq)/(t2.Seconds())))
 		ch <- 1
 	}()
@@ -78,7 +85,7 @@ func TestMutualTLSServer(t *testing.T) {
 				utils.LogPrintInfo(ret.Text())
 			}
 		}
-		t2 := time.Now().Sub(t1)
+		t2 := time.Since(t1)
 		utils.LogPrintInfo(fmt.Sprintf("HTTP Speed: %.2f/s", float64(totalReq)/(t2.Seconds())))
 		ch <- 1
 	}()

@@ -80,7 +80,7 @@ func GenerateCertWithCA(
 	for _, ipStr := range ipSANs {
 		ip := net.ParseIP(ipStr)
 		if ip == nil {
-			return nil, errors.New("Failed to parse ipSAN")
+			return nil, errors.New("failed to parse ipSAN")
 		}
 		ipSANList = append(ipSANList, ip)
 	}
@@ -113,7 +113,7 @@ func GenerateCertWithCA(
 		cert.ExtKeyUsage = []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth}
 		cert.KeyUsage = x509.KeyUsageDigitalSignature | x509.KeyUsageKeyEncipherment
 	default:
-		return nil, errors.New("Unrecognized cert type")
+		return nil, errors.New("unrecognized cert type")
 	}
 	certBytes, err := x509.CreateCertificate(
 		rand.Reader, cert, caCert,
@@ -147,4 +147,36 @@ func WriteCertAndKey(name string, certBytes []byte, key *rsa.PrivateKey) error {
 		return err
 	}
 	return nil
+}
+
+func LoadCertAndKey(name string) ([]byte, *rsa.PrivateKey, error) {
+	keyContent, err := os.ReadFile(name + ".key")
+	if err != nil {
+		return nil, nil, err
+	}
+	keyBlock, _ := pem.Decode(keyContent)
+	if keyBlock == nil {
+		return nil, nil, errors.New("failed to decode key PEM")
+	}
+	if keyBlock.Type != "RSA PRIVATE KEY" {
+		return nil, nil, errors.New("pem is not RSA private key")
+	}
+	key, err := x509.ParsePKCS1PrivateKey(keyBlock.Bytes)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	caContent, err := os.ReadFile(name + ".crt")
+	if err != nil {
+		return nil, nil, err
+	}
+	caBlock, _ := pem.Decode(caContent)
+	if caBlock == nil {
+		return nil, nil, errors.New("failed to decode ca PEM")
+	}
+	if caBlock.Type != "CERTIFICATE" {
+		return nil, nil, errors.New("pem is not CERTIFICATE")
+	}
+
+	return caBlock.Bytes, key, nil
 }

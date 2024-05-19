@@ -1,8 +1,6 @@
 package backend
 
 import (
-	"bytes"
-	"encoding/base64"
 	"errors"
 	"go_utils/utils/myhttp"
 	"net/url"
@@ -50,12 +48,12 @@ func (b *IndexBackend) ReadAt(p []byte, off int64) (int, error) {
 		formBody := url.Values{}
 		formBody.Add("name", b.name)
 		formBody.Add("index", strconv.FormatInt(i, 10))
-		ret, err := b.c.SendPost(b.url+"/"+"get", formBody)
-		if err != nil {
-			return 0, errors.New("Failed connect backend")
-		}
-		dataRead := ret.Data()
-		dataBuffer = bytes.Join([][]byte{dataBuffer, dataRead}, []byte{})
+		// ret, err := b.c.SendPost(b.url+"/"+"get", formBody)
+		// if err != nil {
+		// 	return 0, errors.New("Failed connect backend")
+		// }
+		// // dataRead := ret.Data()
+		// dataBuffer = bytes.Join([][]byte{dataBuffer, dataRead}, []byte{})
 	}
 
 	bufferStartIndex := off % b.blockSize
@@ -72,24 +70,24 @@ func (b *IndexBackend) WriteAt(p []byte, off int64) (int, error) {
 		return 0, errors.New("Size overflow")
 	}
 
-	var dataBuffer []byte = []byte{}
+	// var dataBuffer []byte = []byte{}
 
 	firstBlock := off / b.blockSize
 	firstBlockPrepend := off % b.blockSize
 
-	endBlock := endPosition / b.blockSize
-	endBlockRemain := (b.blockSize - (endPosition % b.blockSize))
+	// endBlock := endPosition / b.blockSize
+	// endBlockRemain := (b.blockSize - (endPosition % b.blockSize))
 
 	if firstBlockPrepend != 0 {
 		formBody := url.Values{}
 		formBody.Add("name", b.name)
 		formBody.Add("index", strconv.FormatInt(firstBlock, 10))
-		ret, err := b.c.SendPost(b.url+"/"+"get", formBody)
-		if err != nil {
-			return 0, errors.New("Failed connect backend")
-		}
-		dataRead := ret.Data()
-		dataBuffer = bytes.Join([][]byte{dataBuffer, dataRead}, []byte{})
+		// ret, err := b.c.SendPost(b.url+"/"+"get", formBody)
+		// if err != nil {
+		// 	return 0, errors.New("Failed connect backend")
+		// }
+		// dataRead := ret.Data()
+		// dataBuffer = bytes.Join([][]byte{dataBuffer, dataRead}, []byte{})
 	}
 
 	return 0, nil

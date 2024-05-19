@@ -45,6 +45,8 @@ func SortedMapKeys[K cmp.Ordered, V any](m map[K]V) []K {
 	return ret
 }
 
+// Wait <timeout> seconds for <f> to return true, return <warning> when failed
+// <f> is called every 3 secs
 func GenericWaiter(timeout int64, f func() bool, warning string) error {
 	startTime := time.Now()
 	for {

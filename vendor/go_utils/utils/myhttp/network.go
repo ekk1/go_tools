@@ -93,14 +93,14 @@ func (h *HTTPClient) SendReq(method, sendUrl string, body interface{}) (*HTTPRes
 		if f, ok := body.(url.Values); ok {
 			sendBody = strings.NewReader(f.Encode())
 		} else {
-			return nil, errors.New("Body needs to be url.Values")
+			return nil, errors.New("body needs to be url.Values")
 		}
 	}
 	if h.rawSend && body != nil {
 		if f, ok := body.([]byte); ok {
 			sendBody = bytes.NewReader(f)
 		} else {
-			return nil, errors.New("Body needs to be []byte")
+			return nil, errors.New("body needs to be []byte")
 		}
 	}
 	// 3.
@@ -172,7 +172,7 @@ func (h *HTTPClient) SetProxy(proxyURL string) error {
 	if ts, ok := h.c.Transport.(*http.Transport); ok {
 		ts.Proxy = http.ProxyURL(pURL)
 	} else {
-		return errors.New("Failed to get transport")
+		return errors.New("failed to get transport")
 	}
 	return nil
 }
@@ -181,7 +181,7 @@ func (h *HTTPClient) SetDisableCompress() error {
 	if ts, ok := h.c.Transport.(*http.Transport); ok {
 		ts.DisableCompression = true
 	} else {
-		return errors.New("Failed to get transport")
+		return errors.New("failed to get transport")
 	}
 	return nil
 }
@@ -214,7 +214,7 @@ func (h *HTTPClient) SetCustomCert(certPath []string) error {
 				ts.TLSClientConfig = &tls.Config{RootCAs: certPool}
 			}
 		} else {
-			return errors.New("Failed to get transport")
+			return errors.New("failed to get transport")
 		}
 	}
 	return nil
@@ -236,7 +236,7 @@ func (h *HTTPClient) SetClientCert(certFile, keyFile string) error {
 			}
 		}
 	} else {
-		return errors.New("Failed to get transport")
+		return errors.New("failed to get transport")
 	}
 
 	return nil
@@ -336,7 +336,7 @@ func (h *HTTPClient) DownloadFile(url, downloadName string) (int64, error) {
 				} else {
 					utils.LogPrintError("Incompleted download: ", errRead)
 					utils.LogPrintWarning("Total read: ", totalRead, " Total size: ", totalSize)
-					return totalWritten, errors.New("Incompleted download")
+					return totalWritten, errors.New("incompleted download")
 				}
 			} else {
 				utils.LogPrintError("Error during download: ", errRead)
@@ -360,7 +360,7 @@ type HTTPResponse struct {
 
 func (r *HTTPResponse) JSON(recvStruct interface{}) error {
 	if recvStruct == nil {
-		return errors.New("Receive struct is nil!!!")
+		return errors.New("receive struct is nil")
 	}
 	return json.Unmarshal(r.Data, recvStruct)
 }
