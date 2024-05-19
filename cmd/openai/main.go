@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"go_utils/utils"
+)
+
 const SEPRATOR = "<<>>++__--!!@@##--<<>>\n"
 
 var QUICK_PROMPT = map[string]string{
@@ -12,8 +17,19 @@ var MODELS = []string{
 	"dall-e-3",
 }
 
-var KEYS = []string{}
+var KEYS = []*APIKey{}
+var UsingKey *APIKey
+var UsingModel string
 
 func main() {
+	LoadAllKeys()
+	fmt.Println("Choose Model: ")
+	for n, m := range MODELS {
+		fmt.Printf("[%d]: %s", n, m)
+	}
+	modelNoStr, err := utils.ReadUserInput("Enter: ")
+	if err != nil {
+		utils.LogPrintError(err)
+	}
 
 }

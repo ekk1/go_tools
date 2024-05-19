@@ -8,3 +8,4 @@ cmd/index_interface/main
 *.yml
 *.exe
 test.html
+cmd/openai/key.txt
