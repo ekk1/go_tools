@@ -9,3 +9,4 @@ cmd/index_interface/main
 *.exe
 test.html
 cmd/openai/key.txt
+.DS_Store
