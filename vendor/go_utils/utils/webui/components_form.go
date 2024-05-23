@@ -39,11 +39,23 @@ func NewLabel(content string, target string) *Element {
 	l.SetAttr("for", target)
 	return l
 }
+
 func NewTextInput(name string) *GroupElement {
 	idSuffix := utils.RandomString(5)
 	return NewGroupElement(
 		NewLabel(name, name+"-"+idSuffix),
 		NewInput(name, "text", "", name+"-"+idSuffix), NewBR(),
+	)
+}
+
+func NewTextAreaInput(name string) *GroupElement {
+	idSuffix := utils.RandomString(5)
+	area := NewElement("textarea", "")
+	area.SetAttr("name", name)
+	area.SetAttr("id", name+"-"+idSuffix)
+	return NewGroupElement(
+		NewLabel(name, name+"-"+idSuffix), NewBR(),
+		area, NewBR(),
 	)
 }
 

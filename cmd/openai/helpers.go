@@ -8,6 +8,8 @@ import (
 	"os"
 )
 
+const SEPRATOR = "<<>>++__--!!@@##--<<>>\n"
+
 type APIKey struct {
 	Name     string `json:"name"`
 	Key      string `json:"key"`
@@ -22,7 +24,7 @@ func LoadAllKeys() error {
 			utils.LogPrintWarning("No key file exists, creating...")
 			initKeys := []*APIKey{{
 				Name: "test",
-				Key:  "",
+				Key:  "sk-",
 			}}
 			writeData, errJson := json.Marshal(initKeys)
 			if errJson != nil {
@@ -32,7 +34,7 @@ func LoadAllKeys() error {
 				return errWr
 
 			}
-			return nil
+			return errors.New("No key")
 		}
 		return err
 	}
@@ -40,6 +42,11 @@ func LoadAllKeys() error {
 	if err := json.Unmarshal(keyData, &KEYS); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+func InitIOFile() error {
 
 	return nil
 }

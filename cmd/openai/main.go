@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"go_utils/utils"
+	"go_utils/utils/myhttp"
+	"go_utils/utils/webui"
+	"net/http"
 )
-
-const SEPRATOR = "<<>>++__--!!@@##--<<>>\n"
 
 var QUICK_PROMPT = map[string]string{
 	"ff": "帮我翻译一下我发过来的内容到中文",
@@ -23,13 +23,43 @@ var UsingModel string
 
 func main() {
 	LoadAllKeys()
-	fmt.Println("Choose Model: ")
-	for n, m := range MODELS {
-		fmt.Printf("[%d]: %s", n, m)
-	}
-	modelNoStr, err := utils.ReadUserInput("Enter: ")
-	if err != nil {
-		utils.LogPrintError(err)
-	}
 
+	s := myhttp.NewServer("ai", "0.0.0.0", "7777")
+	s.AddGet("/", handleIndex)
+	s.AddPost("/chat", handleChat)
+	s.Serve()
+}
+
+func renderPage() []byte {
+	base := webui.NewNavBase("ChatGPT")
+	base.AddNavItem("Index", "/")
+	base.CurrentNavItem = "Index"
+
+	base.AddSection(
+		"",
+		webui.NewCardHalf(
+			webui.NewHeader("ChatGPT", "h1"),
+			webui.NewLinkBtn("Refresh", "/"),
+		),
+	)
+
+	base.AddSection("Input",
+		webui.NewCardHalf(
+			webui.NewForm("/chat", "Chat",
+				webui.NewTextAreaInput("chat"),
+				webui.NewSubmitBtn("Submit", "submit2"),
+			),
+		),
+	)
+	return []byte(base.Render())
+}
+
+func handleChat(w http.ResponseWriter, req *http.Request) {
+	inputPrompt := req.FormValue("chat")
+	utils.LogPrintInfo(inputPrompt)
+	w.Write(renderPage())
+}
+
+func handleIndex(w http.ResponseWriter, req *http.Request) {
+	w.Write(renderPage())
 }
