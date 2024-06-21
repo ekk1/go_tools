@@ -1,3 +1,4 @@
+// iconv -f gbk -t utf8 xxx.txt > xxx.txt
 package main
 
 import (
