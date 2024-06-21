@@ -15,6 +15,9 @@ var indexHTML []byte
 //go:embed script.js
 var js []byte
 
+//go:embed w3.css
+var css []byte
+
 var QUICK_PROMPT = map[string]string{
 	"ff": "帮我翻译一下我发过来的内容到中文",
 }
@@ -35,6 +38,7 @@ func main() {
 	s := myhttp.NewServer("ai", "127.0.0.1", "7777")
 	s.AddGet("/", handleIndex)
 	s.AddGet("/script.js", handleJS)
+	s.AddGet("/w3.css", handleCSS)
 	s.AddPost("/chat", handleChat)
 	s.Serve()
 
@@ -68,4 +72,8 @@ func handleIndex(w http.ResponseWriter, req *http.Request) {
 func handleJS(w http.ResponseWriter, req *http.Request) {
 	utils.LogPrintInfo(req.Header)
 	w.Write(js)
+}
+func handleCSS(w http.ResponseWriter, req *http.Request) {
+	utils.LogPrintInfo(req.Header)
+	w.Write(css)
 }
