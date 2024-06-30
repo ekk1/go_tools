@@ -29,6 +29,7 @@ func TestUI(t *testing.T) {
 		NewRadioInput("radio1", "A"),
 		NewRadioInput("radio1", "B"),
 		NewRadioInput("radio1", "C"),
+		NewTextAreaInput("page"),
 		NewSubmitBtn("submit", "submit1"),
 	)
 	form2 := NewForm("http://127.0.0.1:5000/post", "test")
@@ -56,15 +57,26 @@ func TestUI(t *testing.T) {
 	pane3 := NewCardHalf(hh, form1)
 	pane4 := NewCardHalf(hh, form2)
 
+	table := NewTable(
+		NewTableRow(true, "Proxy", "Now"),
+		NewTableRow(false, "Proxy", "Now"),
+		NewTableRow(false, "Proxy", "Now"),
+		NewTableRow(false, "Proxy", "Now"),
+		NewTableRow(false, "Proxy", "Now"),
+		NewTableRow(false, "Proxy", "Now"),
+	)
+	pane5 := NewCardHalf(table)
+
 	paneAbout := NewCardFull(
 		NewHeader("About", "h2"),
-		NewPreText("this is text\njdwioajwd\n\n\n\n\n\n\n\n\n\n\n\n\n\n"),
+		NewPreText("this is text\njdwioajwd\n\n\n\n\n\n\n\n"),
 	)
 	paneAbout.SetContentCenter()
-	base.AddContent(paneAbout)
+	base.AddSection("About", paneAbout)
 
 	base.AddSection("section 1", pane1, pane3)
 	base.AddSection("section 2", pane2, pane4)
+	base.AddSection("section 3", pane5, pane5)
 
 	os.WriteFile("output/test.html", []byte(base.Render()), 0644)
 }

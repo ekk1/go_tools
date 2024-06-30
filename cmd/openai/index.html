@@ -12,7 +12,14 @@
     </style>
 </head>
 <body>
-    <div id="output"></div>
+    <input type="text" id="model_input" value="gpt-4o"><br>
+    <pre id="output"></pre>
+    <textarea id="input" rows="40" cols="100" placeholder="在此输入..."></textarea><br>
+    <button onclick="fetchStream()">Submit</button><br>
+    <input type="text" id="save_input" value="1"><br>
+    <button onclick="SaveInput()">Save</button>
+    <!-- <button onclick="LoadInput()">Load</button> -->
+    <ul id="file_list"></ul> <!-- 新增文件列表 -->
     <script src="script.js"></script>
 </body>
 </html>

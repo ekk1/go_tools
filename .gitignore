@@ -9,4 +9,6 @@ cmd/index_interface/main
 *.exe
 test.html
 cmd/openai/key.txt
+cmd/openai/proxy.txt
+cmd/openai/endpoint.txt
 .DS_Store

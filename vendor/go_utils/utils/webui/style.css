@@ -1,37 +1,38 @@
 html {
   font-family: monospace;
-  font-size: large;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 body {
   margin: 0;
   width: 100%;
   height: 100%;
-}
-* {
-  box-sizing: border-box;
+  background-color: #f4f4f9;
 }
 
 h1 {
-  color: DarkMagenta;
+  color: #4A0072;
+  font-size: 2em;
+  font-weight: bold;
 }
 
 table {
+  width: 100%;
   margin-top: 20px;
-}
-table, th, td {
-  border: 1px solid black;
   border-collapse: collapse;
 }
-th, td {
-  padding: 5px;
+table, th, td {
   border: 1px solid #ddd;
 }
+th, td {
+  padding: 10px;
+  text-align: left;
+}
 tr:nth-child(even) {background-color: #f2f2f2;}
-tr:hover {background-color: #ddd;}
+tr:hover {background-color: #e0e0e0;}
 th {
   padding-top: 12px;
   padding-bottom: 12px;
-  text-align: left;
   background-color: #04AA6D;
   color: white;
 }
@@ -39,38 +40,34 @@ th {
 input {
   margin: 8px;
   font-family: monospace;
-  background-color: rgba(255, 250, 240, 0.4);
-  border: 1px solid;
+  background-color: #fffaf0;
+  border: 1px solid #ccc;
   border-radius: 20px;
-  padding: 2px 12px 2px;
+  padding: 8px 12px;
 }
+
 fieldset {
   border: 1.5px groove rgba(169,169,169,0.3);
-  border-radius: 15px;
+  border-radius: 10px;
 }
 
 div {
   padding: 10px;
   margin: 5px;
+  /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
 }
 
 textarea {
   width: 100%;
   height: 150px;
   padding: 15px;
-  box-sizing: border-box;
-
-  font-family: monospace, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
+  margin: 15px 15px 15px 15px;
+  font-family: monospace;
   color: #333;
-
-  background-color: #e6f7ff;
+  background-color: rgba(230, 247, 255, 0.4);
   border: 1px solid #ccc;
   border-radius: 8px;
-
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
@@ -134,7 +131,9 @@ textarea::placeholder {
 .content-card {
   background-color: rgba(220,220,220,0.4);
   border-radius: 30px;
-  padding: 10px 30px 25px;
+  padding: 20px 30px 25px;
+  margin: 15px;
+  box-shadow: 1px 1px 6px 3px rgba(0,0,0,0.24);
 }
 
 .ccdiv {
@@ -146,70 +145,70 @@ textarea::placeholder {
   .ccdiv {
     display: grid;
     grid-template-columns: repeat(6, 1fr);
-    .div-2 { grid-column: span 2; }
-    .div-3 { grid-column: span 3; }
-    .div-4 { grid-column: span 4; }
-    .div-5 { grid-column: span 5; }
-    .div-6 { grid-column: span 6; }
-    .div-7 { grid-column: span 6; }
-    .div-8 { grid-column: span 6; }
-    .div-9 { grid-column: span 6; }
-    .div-10 { grid-column: span 6; }
-    .div-11 { grid-column: span 6; }
-    .div-12 { grid-column: span 6; }
-    .div-third { grid-column: span 3; }
-    .div-half { grid-column: span 6; }
-    .div-full { grid-column: span 6; }
-    .div-nav  { grid-column: span 6; }
-    .div-cc   { grid-column: span 6; }
   }
+  .div-2    { grid-column: span 2; }
+  .div-3    { grid-column: span 3; }
+  .div-4    { grid-column: span 4; }
+  .div-5    { grid-column: span 5; }
+  .div-6    { grid-column: span 6; }
+  .div-7    { grid-column: span 6; }
+  .div-8    { grid-column: span 6; }
+  .div-9    { grid-column: span 6; }
+  .div-10   { grid-column: span 6; }
+  .div-11   { grid-column: span 6; }
+  .div-12   { grid-column: span 6; }
+  .div-third    { grid-column: span 3; }
+  .div-half { grid-column: span 6; }
+  .div-full { grid-column: span 6; }
+  .div-nav  { grid-column: span 6; }
+  .div-cc   { grid-column: span 6; }
 }
 @media screen and (min-width: 768px) {
   .ccdiv {
     grid-template-columns: repeat(8, 1fr);
-    .div-2 { grid-column: span 2; }
-    .div-3 { grid-column: span 3; }
-    .div-4 { grid-column: span 3; }
-    .div-5 { grid-column: span 4; }
-    .div-6 { grid-column: span 4; }
-    .div-7 { grid-column: span 5; }
-    .div-8 { grid-column: span 6; }
-    .div-9 { grid-column: span 6; }
-    .div-10 { grid-column: span 7; }
-    .div-11 { grid-column: span 7; }
-    .div-12 { grid-column: span 8; }
-    .div-third { grid-column: span 3; }
-    .div-half { grid-column: span 4; }
-    .div-full { grid-column: span 8; }
-    .div-nav  { grid-column: span 2; }
-    .div-cc   { grid-column: span 6; }
   }
+  .div-2 { grid-column: span 2; }
+  .div-3 { grid-column: span 3; }
+  .div-4 { grid-column: span 3; }
+  .div-5 { grid-column: span 4; }
+  .div-6 { grid-column: span 4; }
+  .div-7 { grid-column: span 5; }
+  .div-8 { grid-column: span 6; }
+  .div-9 { grid-column: span 6; }
+  .div-10 { grid-column: span 7; }
+  .div-11 { grid-column: span 7; }
+  .div-12 { grid-column: span 8; }
+  .div-third { grid-column: span 3; }
+  .div-half { grid-column: span 4; }
+  .div-full { grid-column: span 8; }
+  .div-nav  { grid-column: span 2; }
+  .div-cc   { grid-column: span 6; }
 }
 @media screen and (min-width: 1200px) {
   .ccdiv {
     grid-template-columns: repeat(12, 1fr);
-    .div-2 { grid-column: span 2; }
-    .div-3 { grid-column: span 3; }
-    .div-4 { grid-column: span 4; }
-    .div-5 { grid-column: span 5; }
-    .div-6 { grid-column: span 6; }
-    .div-7 { grid-column: span 7; }
-    .div-8 { grid-column: span 8; }
-    .div-9 { grid-column: span 9; }
-    .div-10 { grid-column: span 10; }
-    .div-11 { grid-column: span 11; }
-    .div-12 { grid-column: span 12; }
-    .div-third { grid-column: span 4; }
-    .div-half { grid-column: span 6; }
-    .div-full { grid-column: span 12; }
-    .div-nav  { grid-column: span 2; }
-    .div-cc   { grid-column: span 10; }
   }
+  .div-2 { grid-column: span 2; }
+  .div-3 { grid-column: span 3; }
+  .div-4 { grid-column: span 4; }
+  .div-5 { grid-column: span 5; }
+  .div-6 { grid-column: span 6; }
+  .div-7 { grid-column: span 7; }
+  .div-8 { grid-column: span 8; }
+  .div-9 { grid-column: span 9; }
+  .div-10 { grid-column: span 10; }
+  .div-11 { grid-column: span 11; }
+  .div-12 { grid-column: span 12; }
+  .div-third { grid-column: span 4; }
+  .div-half { grid-column: span 6; }
+  .div-full { grid-column: span 12; }
+  .div-nav  { grid-column: span 2; }
+  .div-cc   { grid-column: span 10; }
 }
 
 .css-chart {
-  border-bottom: 1px solid;
-  border-left: 1px solid;
+  border-bottom: 1px solid #ccc;
+  border-left: 1px solid #ccc;
   margin: 1em;
   padding: 0;
   position: relative;
