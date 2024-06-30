@@ -15,10 +15,10 @@ async function fetchStream() {
     if (!response.ok) {
         throw new Error(`Network response was not ok: ${response}`);
     }
-  
+
     const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
     outputElement.textContent = "";
-    
+
     while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -81,7 +81,6 @@ function updateFileList() {
                 } catch (e) {
                     console.error("Failed to parse responseText:", e);
                 }
-                
                 var fileListElem = document.getElementById('file_list');
                 fileListElem.innerHTML = '';  // 清空文件列表
 

@@ -124,7 +124,11 @@ func handleSave(w http.ResponseWriter, req *http.Request) {
 		w.Write([]byte("No content\n"))
 		return
 	}
-	saveName = "save_" + saveName
+
+	if !strings.HasPrefix(saveName, "save_") {
+		saveName = "save_" + saveName
+	}
+
 	if err := os.WriteFile(saveName, []byte(inputStatements), 0600); err != nil {
 		w.Write([]byte("Failed write\n"))
 		return
