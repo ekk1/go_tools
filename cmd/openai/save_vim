@@ -1,0 +1,76 @@
+我要写一个纯原生的 vimrc，不要用任何第三方依赖和插件，只允许使用原生的 vimscript。
+需要实现一个 golang 的 lsp 客户端，接入 gopls，然后把 go 的 omni 补全函数替换成这个 lsp 客户端，在输入的时候异步实现补全，像是 youcompleteme 一样，先帮我写一个基础的出来吧，然后慢慢改
+
+" Function to start gopls server
+function! StartGoplsServer()
+    if exists('g:job_id')
+        call job_stop(g:job_id)
+    endif
+    let g:job_id = job_start(['gopls'], {
+                \ 'stdin': 'pipe',
+                \ 'stdout': 'pipe',
+                \ 'stderr': 'pipe',
+                \ 'rpc': v:true
+                \ })
+endfunction
+
+" Function to make an LSP request
+function! LSP_request(method, params)
+    let l:request = {
+                \ 'jsonrpc': '2.0',
+                \ 'id': 1,
+                \ 'method': a:method,
+                \ 'params': a:params
+                \ }
+    call chan_sendraw(g:job_id, json_encode(l:request) . "\n")
+endfunction
+
+" Function to handle LSP response
+function! LSP_response(channel, msg)
+    let l:response = json_decode(a:msg)
+    " Handle the response here...
+endfunction
+
+" Attach the handler to the channel
+augroup gopls_lsp
+    autocmd!
+    autocmd User job_activity call LSP_response(job_id, job_received_output)
+augroup END
+
+" Start gopls when Vim starts
+autocmd VimEnter * call StartGoplsServer()
+
+" Function to handle auto-completion request
+function! Complete()
+    let l:params = {
+                \ 'textDocument': {
+                \ 'uri': 'file://' . expand('%:p')
+                \ },
+                \ 'position': {
+                \ 'line': line('.') - 1,
+                \ 'character': col('.') - 1
+                \ }
+                \ }
+
+    call LSP_request('textDocument/completion', l:params)
+endfunction
+
+" Function to handle completion response
+function! LSP_response(channel, msg)
+    let l:response = json_decode(a:msg)
+    if has_key(l:response, 'result')
+        let l:items = l:response['result']
+        let l:completions = []
+        for l:item in l:items
+            call add(l:completions, l:item['label'])
+        endfor
+        call complete(col('.') - 1, l:completions)
+    endif
+endfunction
+
+" Trigger completion on text change
+autocmd TextChangedI * call Complete()
+
+
+好像没反应啊
+

@@ -1,0 +1,1 @@
+js 使用 local sesstion storage 存储一个 key，然后如果本地存了则 load 出来，没有就不管
