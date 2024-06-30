@@ -137,6 +137,7 @@ func (c *OpenAIClient) Chat(ctx context.Context, request *ChatRequest, responseC
 	data, err := json.Marshal(request)
 	if err != nil {
 		responseChan <- ChatResponse{Error: err.Error()}
+		return
 	}
 
 	req, err := http.NewRequestWithContext(
@@ -146,6 +147,7 @@ func (c *OpenAIClient) Chat(ctx context.Context, request *ChatRequest, responseC
 	)
 	if err != nil {
 		responseChan <- ChatResponse{Error: err.Error()}
+		return
 	}
 
 	req.Header.Set("Content-Type", "application/json")
@@ -154,6 +156,7 @@ func (c *OpenAIClient) Chat(ctx context.Context, request *ChatRequest, responseC
 	resp, err := c.client.Do(req)
 	if err != nil {
 		responseChan <- ChatResponse{Error: err.Error()}
+		return
 	}
 	defer resp.Body.Close()
 

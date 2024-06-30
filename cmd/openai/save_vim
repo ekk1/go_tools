@@ -1,76 +1,317 @@
 我要写一个纯原生的 vimrc，不要用任何第三方依赖和插件，只允许使用原生的 vimscript。
-需要实现一个 golang 的 lsp 客户端，接入 gopls，然后把 go 的 omni 补全函数替换成这个 lsp 客户端，在输入的时候异步实现补全，像是 youcompleteme 一样，先帮我写一个基础的出来吧，然后慢慢改
+需要实现一个 golang 的 lsp 客户端，接入 gopls，然后把 go 的 omni 补全函数替换成这个 lsp 客户端，在输入的时候异步实现补全，像是 youcompleteme 一样
 
-" Function to start gopls server
-function! StartGoplsServer()
-    if exists('g:job_id')
-        call job_stop(g:job_id)
+这个似乎是 vim9 新加入的 lsp 支持，可以参考这个文档
+15. Language Server Protocol                    language-server-protocol
+
+The language server protocol specification is available at:
+
+    https://microsoft.github.io/language-server-protocol/specification
+
+Each LSP protocol message starts with a simple HTTP header followed by the
+payload encoded in JSON-RPC format.  This is described in:
+
+    https://www.jsonrpc.org/specification
+
+To encode and send a LSP request/notification message in a Vim Dict into a
+LSP JSON-RPC message and to receive and decode a LSP JSON-RPC
+response/notification message into a Vim Dict, connect to the LSP server
+with the channel-mode set to "lsp".
+
+For messages received on a channel with channel-mode set to "lsp", Vim will
+process the HTTP header and decode the JSON-RPC payload into a Vim Dict type
+and call the channel-callback function or the specified
+channel-onetime-callback function.  When sending messages on a channel using
+the ch_evalexpr() or ch_sendexpr() functions, Vim will add the HTTP header
+and encode the Vim expression into JSON.  Refer to json_encode() and
+json_decode() for more information about how Vim encodes and decodes the
+builtin types into JSON.
+
+To open a channel using the 'lsp' mode, set the 'mode' item in the ch_open()
+{options} argument to 'lsp'.  Example:
+
+    let ch = ch_open(..., #{mode: 'lsp'})
+
+To open a channel using the 'lsp' mode with a job, set the 'in_mode' and
+'out_mode' items in the job_start() {options} argument to 'lsp'. Example:
+
+    let cmd = ['clangd', '--background-index', '--clang-tidy']
+    let opts = {}
+    let opts.in_mode = 'lsp'
+    let opts.out_mode = 'lsp'
+    let opts.err_mode = 'nl'
+    let opts.out_cb = function('LspOutCallback')
+    let opts.err_cb = function('LspErrCallback')
+    let opts.exit_cb = function('LspExitCallback')
+    let job = job_start(cmd, opts)
+
+Note that if a job outputs LSP messages on stdout and non-LSP messages on
+stderr, then the channel-callback function should handle both the message
+formats appropriately or you should use a separate callback function for
+"out_cb" and "err_cb" to handle them as shown above.
+
+To synchronously send a JSON-RPC request to the server, use the
+ch_evalexpr() function. This function will wait and return the decoded
+response message from the server. You can use either the channel-timeout or
+the 'timeout' field in the {options} argument to control the response wait
+time.  If the request times out, then an empty Dict is returned.  Example:
+
+    let req = {}
+    let req.method = 'textDocument/definition'
+    let req.params = {}
+    let req.params.textDocument = #{uri: 'a.c'}
+    let req.params.position = #{line: 10, character: 3}
+    let defs = ch_evalexpr(ch, req, #{timeout: 100})
+    if defs->empty()
+        ... <handle failure>
     endif
-    let g:job_id = job_start(['gopls'], {
-                \ 'stdin': 'pipe',
-                \ 'stdout': 'pipe',
-                \ 'stderr': 'pipe',
-                \ 'rpc': v:true
-                \ })
+
+Note that in the request message the 'id' field should not be specified. If it
+is specified, then Vim will overwrite the value with an internally generated
+identifier.  Vim currently supports only a number type for the 'id' field.
+The callback function will be invoked for both a successful and a failed RPC
+request.
+
+To send a JSON-RPC request to the server and asynchronously process the
+response, use the ch_sendexpr() function and supply a callback function.  If
+the "id" field is present in the request message, then Vim will overwrite it
+with an internally generated number.  This function returns a Dict with the
+identifier used for the message.  This can be used to send cancellation
+request to the LSP server (if needed).  Example:
+
+    let req = {}
+    let req.method = 'textDocument/hover'
+    let req.id = 200
+    let req.params = {}
+    let req.params.textDocument = #{uri: 'a.c'}
+    let req.params.position = #{line: 10, character: 3}
+    let resp = ch_sendexpr(ch, req, #{callback: 'HoverFunc'})
+
+To cancel an outstanding asynchronous LSP request sent to the server using the
+ch_sendexpr() function, send a cancellation message to the server using the
+ch_sendexpr() function with the ID returned by the ch_sendexpr() function
+for the request.  Example:
+
+    " send a completion request
+    let req = {}
+    let req.method = 'textDocument/completion'
+    let req.params = {}
+    let req.params.textDocument = #{uri: 'a.c'}
+    let req.params.position = #{line: 10, character: 3}
+    let reqstatus = ch_sendexpr(ch, req, #{callback: 'LspComplete'})
+    " send a cancellation notification
+    let notif = {}
+    let notif.method = '$/cancelRequest'
+    let notif.id = reqstatus.id
+    call ch_sendexpr(ch, notif)
+
+To send a JSON-RPC notification message to the server, use the ch_sendexpr()
+function. As the server will not send a response message to the notification,
+don't specify the "callback" item.  Example:
+
+    call ch_sendexpr(ch, #{method: 'initialized'})
+
+To respond to a JSON-RPC request message from the server, use the
+ch_sendexpr() function.  In the response message, copy the 'id' field value
+from the server request message. Example:
+
+    let resp = {}
+    let resp.id = req.id
+    let resp.result = 1
+    call ch_sendexpr(ch, resp)
+
+The JSON-RPC notification messages from the server are delivered through the
+channel-callback function.
+
+Depending on the use case, you can use the ch_evalexpr(), ch_sendexpr() and
+ch_sendraw() functions on the same channel.
+
+A LSP request message has the following format (expressed as a Vim Dict).  The
+"params" field is optional:
+
+    {
+        "jsonrpc": "2.0",
+        "id": <number>,
+        "method": <string>,
+        "params": <list|dict>
+    }
+
+A LSP response message has the following format (expressed as a Vim Dict).  The
+"result" and "error" fields are optional:
+
+    {
+        "jsonrpc": "2.0",
+        "id": <number>,
+        "result": <vim type>
+        "error": <dict>
+    }
+
+A LSP notification message has the following format (expressed as a Vim Dict).
+The "params" field is optional:
+
+    {
+        "jsonrpc": "2.0",
+        "method": <string>,
+        "params": <list|dict>
+    }
+
+
+ vim:tw=78:ts=8:noet:ft=help:norl:
+
+下面是一个你之前给的 vimrc 文件，但是还是有问题，请仔细排查
+
+```vimrc
+" Callback function to process LSP server responses
+function! s:LspOutCallback(channel, json) abort
+  if empty(a:json)
+    return
+  endif
+
+  if has_key(a:json, 'method')
+    if a:json.method == 'textDocument/publishDiagnostics'
+      echom 'Diagnostics: ' . string(a:json.params.diagnostics)
+    elseif a:json.method == 'window/showMessage'
+      echom 'LSP Message: ' . string(a:json.params.message)
+    endif
+  elseif has_key(a:json, 'id')
+    if has_key(a:json, 'result')
+      call s:LspCompleteCallback(a:json)
+    elseif has_key(a:json, 'error')
+      echom 'LSP Error: ' . string(a:json.error)
+    endif
+  endif
 endfunction
 
-" Function to make an LSP request
-function! LSP_request(method, params)
-    let l:request = {
-                \ 'jsonrpc': '2.0',
-                \ 'id': 1,
-                \ 'method': a:method,
-                \ 'params': a:params
-                \ }
-    call chan_sendraw(g:job_id, json_encode(l:request) . "\n")
+function! s:LspErrCallback(channel, msg) abort
+  echom 'LSP Error: ' . a:msg
 endfunction
 
-" Function to handle LSP response
-function! LSP_response(channel, msg)
-    let l:response = json_decode(a:msg)
-    " Handle the response here...
+function! s:LspExitCallback(channel, status) abort
+  echom 'LSP Server exited with code ' . a:status
 endfunction
 
-" Attach the handler to the channel
-augroup gopls_lsp
-    autocmd!
-    autocmd User job_activity call LSP_response(job_id, job_received_output)
+function! s:LspCompleteCallback(response) abort
+  if has_key(a:response, 'result') && has_key(a:response.result, 'items')
+    let l:items = a:response.result.items
+    let l:matches = []
+
+    for l:item in l:items
+      let l:label = get(l:item, 'label', '')
+      let l:detail = get(l:item, 'detail', '')
+      let l:documentation = get(l:item, 'documentation', '')
+
+      call add(l:matches, {
+            \ 'word': l:label,
+            \ 'abbr': l:label,
+            \ 'menu': (type(l:detail) == v:t_dict ? string(l:detail) : l:detail),
+            \ 'info': (type(l:documentation) == v:t_dict ? string(l:documentation) : l:documentation),
+            \ })
+    endfor
+
+    if !empty(l:matches)
+      call complete(col('.') - 1, l:matches)
+    endif
+
+  else
+    echom 'LSP completion: No items found.'
+  endif
+endfunction
+
+function! s:LspCompleteFind(findstart, base) abort
+  if a:findstart
+    " Return the position of the start of the word
+    let l:line = getline('.')
+    let l:start = col('.') - 1
+    while l:start > 0 && l:line[l:start - 1] =~# '\k'
+      let l:start -= 1
+    endwhile
+    return l:start
+  else
+    " Send completion request to LSP server
+    if !exists('b:lsp_channel')
+      return []
+    endif
+    
+    " Avoid duplicate completion requests
+    if exists('b:completion_ongoing') && b:completion_ongoing
+      return []
+    endif
+
+    let b:completion_ongoing = 1
+    
+    let l:req = {
+          \ 'jsonrpc': '2.0',
+          \ 'method': 'textDocument/completion',
+          \ 'id': 999,
+          \ 'params': {
+          \     'textDocument': {'uri': 'file://' . expand('%:p')},
+          \     'position': {'line': line('.') - 1, 'character': col('.') - 1}
+          \     }
+          \ }
+    call ch_sendexpr(b:lsp_channel, l:req, #{callback: function('s:LspCompleteCallback')})
+    return []
+  endif
+endfunction
+
+augroup LspGolang
+  autocmd!
+  autocmd FileType go call s:SetupGolangLsp()
 augroup END
 
-" Start gopls when Vim starts
-autocmd VimEnter * call StartGoplsServer()
+function! s:SetupGolangLsp() abort
+  if exists('b:lsp_channel')
+    call job_stop(b:lsp_channel)
+  endif
 
-" Function to handle auto-completion request
-function! Complete()
-    let l:params = {
-                \ 'textDocument': {
-                \ 'uri': 'file://' . expand('%:p')
-                \ },
-                \ 'position': {
-                \ 'line': line('.') - 1,
-                \ 'character': col('.') - 1
-                \ }
-                \ }
+  silent! let b:lsp_channel = job_start(['gopls'], {
+        \ 'in_mode': 'lsp',
+        \ 'out_mode': 'lsp',
+        \ 'err_mode': 'nl',
+        \ 'out_cb': function('s:LspOutCallback'),
+        \ 'err_cb': function('s:LspErrCallback'),
+        \ 'exit_cb': function('s:LspExitCallback')
+        \ })
 
-    call LSP_request('textDocument/completion', l:params)
+  let l:init_req = {
+        \ 'jsonrpc': '2.0',
+        \ 'method': 'initialize',
+        \ 'id': 1,
+        \ 'params': {
+        \     'processId': getpid(),
+        \     'rootUri': 'file://' . getcwd(),
+        \     'capabilities': {
+        \         'textDocument': {
+        \             'completion': {'dynamicRegistration': v:false},
+        \             'hover': {},
+        \             'definition': {}},
+        \         'workspace': {
+        \             'workspaceFolders': v:false
+        \             }
+        \         }
+        \     }
+        \ }
+
+  call ch_sendexpr(b:lsp_channel, l:init_req, #{callback: function('s:HandleInitResponse')})
+  setlocal omnifunc=s:LspCompleteFind
 endfunction
 
-" Function to handle completion response
-function! LSP_response(channel, msg)
-    let l:response = json_decode(a:msg)
-    if has_key(l:response, 'result')
-        let l:items = l:response['result']
-        let l:completions = []
-        for l:item in l:items
-            call add(l:completions, l:item['label'])
-        endfor
-        call complete(col('.') - 1, l:completions)
-    endif
+function! s:HandleInitResponse(channel, response) abort
+  if has_key(a:response, 'result')
+    echom 'LSP initialized successfully!'
+    let l:notify_req = {'jsonrpc': '2.0', 'method': 'initialized', 'params': v:null}
+    call ch_sendexpr(a:channel, l:notify_req)
+  else
+    echom 'LSP initialization failed: ' . string(a:response)
+  endif
 endfunction
 
-" Trigger completion on text change
-autocmd TextChangedI * call Complete()
+augroup LspAutoComplete
+  autocmd!
+  autocmd InsertCharPre * if &omnifunc == 's:LspCompleteFind' && (!exists('b:completion_ongoing') || !b:completion_ongoing) | call feedkeys("\<C-x>\<C-o>", 'n') | endif
+  autocmd CompleteDone * if exists('b:completion_ongoing') && b:completion_ongoing | let b:completion_ongoing = 0 | endif
+augroup END
+```
 
-
-好像没反应啊
-
+报错了哦
+E118: Too many arguments for function: <SNR>2_LspCompleteCallback
+多检查检查
