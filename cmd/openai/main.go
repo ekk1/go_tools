@@ -25,10 +25,10 @@ func main() {
 	pp, _ := os.ReadFile("proxy.txt")
 	e, _ := os.ReadFile("endpoint.txt")
 	aiClient = openai.NewOpenAIClient(
-		string(e),
-		string(k),
+		strings.TrimSuffix(string(e), "\n"),
+		strings.TrimSuffix(string(k), "\n"),
 	)
-	if err := aiClient.SetProxy(string(pp)); err != nil {
+	if err := aiClient.SetProxy(strings.TrimSuffix(string(pp), "\n")); err != nil {
 		utils.LogPrintError(err)
 		os.Exit(1)
 	}

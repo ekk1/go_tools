@@ -9,17 +9,36 @@
             font-family: monospace;
             white-space: pre-wrap;
         }
+        .textarea-container {
+            display: flex;
+            width: 100%;
+        }
+        .textarea-container textarea {
+            flex: 1;
+            resize: none;
+            margin: 0 2px;
+        }
     </style>
 </head>
 <body>
     <input type="text" id="model_input" value="gpt-4o"><br>
-    <pre id="output"></pre>
-    <textarea id="input" rows="40" cols="100" placeholder="在此输入..."></textarea><br>
-    <button onclick="fetchStream()">Submit</button><br>
+
+
+    <button onclick="fetchStream()">Submit</button>
+    <button onclick="ClearInputs()">Clear</button><br>
     <input type="text" id="save_input" value="1"><br>
     <button onclick="SaveInput()">Save</button>
-    <!-- <button onclick="LoadInput()">Load</button> -->
-    <ul id="file_list"></ul> <!-- 新增文件列表 -->
+    <ul id="file_list"></ul>
+    <textarea id="temp_input" placeholder="Temporary input"></textarea>
+
+    <div class="textarea-container">
+        <textarea id="input1" rows="30" placeholder="在此输入..."></textarea>
+        <textarea id="input2" rows="30" placeholder="在此输入..."></textarea>
+        <textarea id="input3" rows="30" placeholder="在此输入..."></textarea>
+        <textarea id="input4" rows="30" placeholder="在此输入..."></textarea>
+        <textarea id="input5" rows="30" placeholder="在此输入..."></textarea>
+    </div>
+    <pre id="output"></pre>
     <script src="script.js"></script>
 </body>
 </html>
