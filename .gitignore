@@ -11,4 +11,10 @@ test.html
 cmd/openai/key.txt
 cmd/openai/proxy.txt
 cmd/openai/endpoint.txt
+cmd/openai_cli/key.txt
+cmd/openai_cli/proxy.txt
+cmd/openai_cli/endpoint.txt
+cmd/openai_cli/io.txt
+cmd/openai_cli/openai_cli
+cmd/novel/*.txt
 .DS_Store
