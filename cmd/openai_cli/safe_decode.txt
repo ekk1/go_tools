@@ -1,0 +1,140 @@
+PROMPT: 
+<<>>++__--!!@@##--<<>>
+USER: this is doc for safetensor format, help me write a golang program to decode a safetensor file, and print basic infos
+safetensor.doc
+```
+Format
+8 bytes: N, an unsigned little-endian 64-bit integer, containing the size of the header
+N bytes: a JSON UTF-8 string representing the header.
+The header data MUST begin with a { character (0x7B).
+The header data MAY be trailing padded with whitespace (0x20).
+The header is a dict like {"TENSOR_NAME": {"dtype": "F16", "shape": [1, 16, 256], "data_offsets": [BEGIN, END]}, "NEXT_TENSOR_NAME": {...}, ...},
+data_offsets point to the tensor data relative to the beginning of the byte buffer (i.e. not an absolute position in the file), with BEGIN as the starting offset and END as the one-past offset (so total tensor byte size = END - BEGIN).
+A special key __metadata__ is allowed to contain free form string-to-string map. Arbitrary JSON is not allowed, all values must be strings.
+Rest of the file: byte-buffer.
+
+```
+
+<<>>++__--!!@@##--<<>>
+AI: Sure! Below is a Go program that decodes a safetensor file and prints basic information about the tensors contained within it.
+
+```go
+package main
+
+import (
+	"bytes"
+	"encoding/binary"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"strings"
+)
+
+// TensorInfo represents the information about a tensor
+type TensorInfo struct {
+	Dtype       string `json:"dtype"`
+	Shape       []int  `json:"shape"`
+	DataOffsets [2]int `json:"data_offsets"`
+}
+
+// Header represents the safetensor header
+type Header map[string]interface{}
+
+func readSafetensorFile(filename string) ([]byte, error) {
+	f, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	
+	data, err := ioutil.ReadAll(f)
+	if err != nil {
+		return nil, err
+	}
+	return data, nil
+}
+
+func decodeSafetensor(data []byte) (Header, error) {
+	var headerSize uint64
+	headerSize = binary.LittleEndian.Uint64(data[:8])
+	headerBytes := data[8 : 8+headerSize]
+
+	// Remove trailing whitespace from header
+	headerStr := string(headerBytes)
+	headerStr = strings.TrimSpace(headerStr)
+
+	// Decode JSON header
+	var header Header
+	err := json.Unmarshal([]byte(headerStr), &header)
+	if err != nil {
+		return nil, err
+	}
+
+	return header, nil
+}
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Printf("Usage: %s <safetensor_file>\n", os.Args[0])
+		return
+	}
+
+	filename := os.Args[1]
+
+	data, err := readSafetensorFile(filename)
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return
+	}
+
+	header, err := decodeSafetensor(data)
+	if err != nil {
+		fmt.Println("Error decoding safetensor file:", err)
+		return
+	}
+
+	for name, info := range header {
+		if name == "__metadata__" {
+			fmt.Println("Metadata:")
+			for k, v := range info.(map[string]interface{}) {
+				fmt.Printf("  %s: %s\n", k, v)
+			}
+			continue
+		}
+
+		fmt.Printf("Tensor Name: %s\n", name)
+		tensorInfoBytes, err := json.Marshal(info)
+		if err != nil {
+			fmt.Println("Error marshaling tensor info:", err)
+			continue
+		}
+
+		var tensorInfo TensorInfo
+		if err := json.Unmarshal(tensorInfoBytes, &tensorInfo); err != nil {
+			fmt.Println("Error unmarshaling tensor info:", err)
+			continue
+		}
+
+		fmt.Printf("  Dtype:       %s\n", tensorInfo.Dtype)
+		fmt.Printf("  Shape:       %v\n", tensorInfo.Shape)
+		fmt.Printf("  DataOffsets: %v\n", tensorInfo.DataOffsets)
+	}
+}
+```
+
+### Instructions to Run the Program
+1. Save the program in a file named `safetensor_info.go`.
+2. Make sure you have Go installed on your machine.
+3. Open a terminal and navigate to the directory where you saved the `safetensor_info.go` file.
+4. Build the program using: `go build safetensor_info.go`
+5. Run the program using: `./safetensor_info <path_to_your_safetensor_file>`
+
+### What the Program Does
+1. Reads the safetensor file.
+2. Extracts the header size.
+3. Extracts and trims the JSON header.
+4. Decodes the JSON header into a Go `map`.
+5. Prints basic information about the tensors, including name, dtype, shape, and data offsets.
+6. If any `__metadata__` information is present, it prints that information as well.
+<<>>++__--!!@@##--<<>>
