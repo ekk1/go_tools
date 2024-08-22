@@ -100,7 +100,7 @@ func main() {
 		}
 		data := string(inputBytes)
 
-		chatReq := openai.NewChatRequest("gpt-4o")
+		chatReq := openai.NewChatRequest("gpt-4o-2024-08-06")
 		if err := decodeIOFile(chatReq); err != nil {
 			utils.LogPrintError("Failed to decode io file", err)
 			os.Exit(1)
@@ -150,7 +150,7 @@ func main() {
 				os.Exit(1)
 			}
 		}
-		chatReq := openai.NewChatRequest("gpt-4o")
+		chatReq := openai.NewChatRequest("gpt-4o-2024-08-06")
 		if err := decodeIOFile(chatReq); err != nil {
 			utils.LogPrintError("Failed to decode io file", err)
 			os.Exit(1)
