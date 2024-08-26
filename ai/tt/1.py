@@ -15,3 +15,4 @@ import torch
 get_ipython().run_line_magic('save', '1')
 p = torch.zeros((3,5))
 p
+# 13:54 makemore
