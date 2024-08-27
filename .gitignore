@@ -16,5 +16,6 @@ cmd/openai_cli/proxy.txt
 cmd/openai_cli/endpoint.txt
 cmd/openai_cli/io.txt
 cmd/openai_cli/openai_cli
+cmd/ed2k/ed2k
 cmd/novel/*.txt
 .DS_Store
