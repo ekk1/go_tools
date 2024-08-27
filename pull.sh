@@ -13,3 +13,6 @@ cp -r \
     $PACKAGE_BASE/openai \
     $PACKAGE_BASE/*.go \
     vendor/go_utils/utils/
+
+mkdir -p vendor/official/md4
+cp -r ../crypto/md4/md4* vendor/official/md4
