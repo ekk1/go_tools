@@ -7,11 +7,12 @@ import (
 	"official/md4"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 const chunkSize = 9500 * 1024
 
-func calculateChunkHashes(filePath string) ([][]byte, error) {
+func calculateChunkHashes(filePath string, slowMode bool) ([][]byte, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return nil, err
@@ -21,6 +22,7 @@ func calculateChunkHashes(filePath string) ([][]byte, error) {
 	var chunkHashes [][]byte
 	buffer := make([]byte, chunkSize)
 	for {
+		t1 := time.Now()
 		n, err := file.Read(buffer)
 		if err != nil && err != io.EOF {
 			return nil, err
@@ -32,6 +34,10 @@ func calculateChunkHashes(filePath string) ([][]byte, error) {
 		hasher := md4.New()
 		hasher.Write(buffer[:n])
 		chunkHashes = append(chunkHashes, hasher.Sum(nil))
+		tCalc := time.Now().Sub(t1)
+		if slowMode {
+			time.Sleep(tCalc)
+		}
 
 		if err == io.EOF {
 			break
@@ -41,8 +47,8 @@ func calculateChunkHashes(filePath string) ([][]byte, error) {
 	return chunkHashes, nil
 }
 
-func computeEd2kHash(filePath string) (string, error) {
-	chunkHashes, err := calculateChunkHashes(filePath)
+func computeEd2kHash(filePath string, slowMode bool) (string, error) {
+	chunkHashes, err := calculateChunkHashes(filePath, slowMode)
 	if err != nil {
 		return "", err
 	}
@@ -61,7 +67,7 @@ func computeEd2kHash(filePath string) (string, error) {
 	return hex.EncodeToString(finalHash), nil
 }
 
-func generateEd2kLink(filePath string) (string, error) {
+func generateEd2kLink(filePath string, slowMode bool) (string, error) {
 	fileName := filepath.Base(filePath)
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
@@ -69,7 +75,7 @@ func generateEd2kLink(filePath string) (string, error) {
 	}
 	fileSize := fileInfo.Size()
 
-	ed2kHash, err := computeEd2kHash(filePath)
+	ed2kHash, err := computeEd2kHash(filePath, slowMode)
 	if err != nil {
 		return "", err
 	}
@@ -80,12 +86,17 @@ func generateEd2kLink(filePath string) (string, error) {
 
 func main() {
 	filePath := os.Args[1]
+	slowMode := false
+	if len(os.Args) > 2 {
+		fmt.Println("Running slow mode")
+		slowMode = true
+	}
 
-	ed2kLink, err := generateEd2kLink(filePath)
+	ed2kLink, err := generateEd2kLink(filePath, slowMode)
 	if err != nil {
 		fmt.Println("Error:", err)
 		return
 	}
 
-	fmt.Println("eD2k Address:", ed2kLink)
+	fmt.Println(ed2kLink)
 }
