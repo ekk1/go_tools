@@ -11,6 +11,7 @@ cp -r \
     $PACKAGE_BASE/webui \
     $PACKAGE_BASE/nbd \
     $PACKAGE_BASE/openai \
+    $PACKAGE_BASE/redis \
     $PACKAGE_BASE/*.go \
     vendor/go_utils/utils/
 

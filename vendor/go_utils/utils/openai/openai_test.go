@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go_utils/utils"
 	"os"
+	"strings"
 	"testing"
 )
 
@@ -14,10 +15,10 @@ func TestOpenAI(t *testing.T) {
 	pp, _ := os.ReadFile("proxy.txt")
 	e, _ := os.ReadFile("endpoint.txt")
 	c := NewOpenAIClient(
-		string(e),
-		string(k),
+		strings.TrimSuffix(string(e), "\n"),
+		strings.TrimSuffix(string(k), "\n"),
 	)
-	if err := c.SetProxy(string(pp)); err != nil {
+	if err := c.SetProxy(strings.TrimSuffix(string(pp), "\n")); err != nil {
 		t.Fatal(err)
 	}
 
@@ -25,8 +26,7 @@ func TestOpenAI(t *testing.T) {
 
 	responses := make(chan ChatResponse)
 	req := NewChatRequest("gpt-4o")
-	req.AddSystemMessage("You are a experienced vim pro, and you can write vimscript and other things without using any third party plugins, just with pure vim")
-	req.AddUserMessage("help me write a lsp client in vimscript for gopls, make it asynchronus, and use this as the omnifunc for golang, also make the completion list show as i input codes, and make the completion list more beautiful, like surrounded by borders like a balloon, and no background color, making it look like transparent")
+	req.AddUserMessage("how to disable all login from tty console, and only allow login from ssh")
 
 	go c.Chat(context.Background(), req, responses)
 
