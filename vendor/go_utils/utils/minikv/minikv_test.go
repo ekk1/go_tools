@@ -7,10 +7,7 @@ import (
 )
 
 func TestBenchMiniKV(t *testing.T) {
-	kv, err := NewKV("test", 0)
-	if err != nil {
-		t.Fatal(err)
-	}
+	kv := MustNewKV("test", 0)
 	runTime := 1 * 1024 * 1024
 	dataKey := "key"
 	dataValue := "value"
@@ -34,10 +31,7 @@ func TestBenchMiniKV(t *testing.T) {
 }
 
 func TestMiniKV(t *testing.T) {
-	kv, err := NewKV("test2", 0)
-	if err != nil {
-		t.Fatal(err)
-	}
+	kv := MustNewKV("test2", 0)
 	testData := map[string]string{
 		"k1": "v1",
 		"k2": "v1",
@@ -86,4 +80,37 @@ func TestMiniKV(t *testing.T) {
 	t.Log(kv2.Get("k2"))
 	t.Log(kv2.Get("k8"))
 	t.Log(kv2.Get("11"))
+}
+
+func TestSave(t *testing.T) {
+	kv := MustNewKV("test", 0)
+	kv.Load()
+
+	orig := kv.Get("1")
+	if orig == "" {
+		kv.Set("1", "1")
+	} else {
+		kv.Set("1", orig+"1")
+	}
+
+	kv.Save()
+	time.Sleep(1 * time.Second)
+
+	orig = kv.Get("2")
+	if orig == "" {
+		kv.Set("2", "2")
+	} else {
+		kv.Set("2", orig+"2")
+	}
+	kv.Save()
+	time.Sleep(1 * time.Second)
+
+	orig = kv.Get("3")
+	if orig == "" {
+		kv.Set("3", "3")
+	} else {
+		kv.Set("3", orig+"3")
+	}
+	kv.Save()
+	time.Sleep(1 * time.Second)
 }

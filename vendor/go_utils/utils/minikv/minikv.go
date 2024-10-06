@@ -5,8 +5,12 @@ import (
 	"errors"
 	"go_utils/utils"
 	"os"
+	"regexp"
+	"slices"
+	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 /*
@@ -16,16 +20,18 @@ TODO:
 3. Count hit num
 */
 
+const MAX_DB_SAVES = 3
+
 type KV struct {
-	name       string
-	counter    map[string]int64
-	kvs        map[string]string
-	lastSaved  int64
-	lastSaveOK bool
-	limit      int64
-	current    int64
-	key        []byte
-	lock       sync.Mutex
+	name string
+	// counter    map[string]int64
+	kvs map[string]string
+	// lastSaved  int64
+	// lastSaveOK bool
+	limit int64
+	// current    int64
+	// key        []byte
+	lock sync.Mutex
 }
 
 func NewKV(name string, limit int64) (*KV, error) {
@@ -33,7 +39,7 @@ func NewKV(name string, limit int64) (*KV, error) {
 	if limit <= 0 {
 		newLimit = 128 * 1024 * 1024
 	} else if limit > 0 && limit < 1*1024*1024 {
-		return nil, errors.New("Limit should be larger than 1MB")
+		return nil, errors.New("limit should be larger than 1MB")
 	} else {
 		newLimit = limit
 	}
@@ -92,27 +98,86 @@ func (kv *KV) Exists(key string) bool {
 func (kv *KV) Delete(key string) error {
 	kv.lock.Lock()
 	defer kv.lock.Unlock()
-	if _, ok := kv.kvs[key]; ok {
-		delete(kv.kvs, key)
-	}
+	// if _, ok := kv.kvs[key]; ok {
+	delete(kv.kvs, key)
+	// }
 	return nil
+}
+
+func getDBFiles(kvName string) ([]string, error) {
+	pwdItems, err := os.ReadDir(".")
+	if err != nil {
+		return nil, err
+	}
+	foundDBFiles := []string{}
+
+	for _, f := range pwdItems {
+		if f.IsDir() {
+			continue
+		}
+		if m, err := regexp.MatchString(
+			kvName+".snapshot."+"\\d+",
+			f.Name(),
+		); err != nil {
+			return nil, err
+		} else {
+			if m {
+				foundDBFiles = append(foundDBFiles, f.Name())
+			}
+		}
+	}
+
+	slices.Sort(foundDBFiles)
+	return foundDBFiles, nil
 }
 
 func (kv *KV) Save() error {
 	kv.lock.Lock()
 	defer kv.lock.Unlock()
-	fileName := kv.name + ".snapshot"
+	t1 := strconv.FormatInt(
+		time.Now().UnixMilli(),
+		10,
+	)
+	fileName := kv.name + ".snapshot." + t1
 	jsonBytes, err := json.Marshal(kv.kvs)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(fileName, jsonBytes, 0600)
+	if err := os.WriteFile(fileName, jsonBytes, 0600); err != nil {
+		return err
+	}
+
+	if dbFiles, err := getDBFiles(kv.name); err != nil {
+		return err
+	} else {
+		if len(dbFiles) > MAX_DB_SAVES {
+			for _, v := range dbFiles[0 : len(dbFiles)-MAX_DB_SAVES] {
+				if delErr := os.Remove(v); delErr != nil {
+					return delErr
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func (kv *KV) Load() error {
 	kv.lock.Lock()
 	defer kv.lock.Unlock()
-	fileName := kv.name + ".snapshot"
+
+	dbFiles, err := getDBFiles(kv.name)
+	if err != nil {
+		return err
+	}
+
+	if len(dbFiles) < 1 {
+		utils.LogPrintWarning("no db file found")
+		return nil
+	}
+
+	fileName := dbFiles[len(dbFiles)-1]
+	utils.LogPrintDebug("Reading DB File:", fileName)
 	data, err := os.ReadFile(fileName)
 	if err != nil {
 		return err
