@@ -6,95 +6,57 @@ func NewDiv(w ...WebUI) *Element {
 	return d
 }
 
-func NewColumnDiv(w ...WebUI) *Element {
+func NewRow(w ...WebUI) *Element {
 	d := NewDiv(w...)
-	d.SetClass("ccdiv")
+	d.SetClass("w3-row")
 	return d
 }
 
-func NewDiv2C(w ...WebUI) *Element {
+func NewCol(size string, w ...WebUI) *Element {
 	d := NewDiv(w...)
-	d.SetClass("div-2")
+	d.SetClass(size)
 	return d
 }
-func NewDiv3C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-3")
-	return d
+func NewColThird(w ...WebUI) *Element {
+	return NewCol("w3-third", w...)
 }
-func NewDiv4C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-4")
-	return d
+func NewColTwoThird(w ...WebUI) *Element {
+	return NewCol("w3-twothird", w...)
 }
-func NewDiv5C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-5")
-	return d
+func NewColQuarter(w ...WebUI) *Element {
+	return NewCol("w3-quarter", w...)
 }
-func NewDiv6C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-6")
-	return d
+func NewColThreeQuarter(w ...WebUI) *Element {
+	return NewCol("w3-threequarter", w...)
 }
-func NewDiv7C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-7")
-	return d
+func NewColHalf(w ...WebUI) *Element {
+	return NewCol("w3-half", w...)
 }
-func NewDiv8C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-8")
-	return d
-}
-func NewDiv9C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-9")
-	return d
-}
-func NewDiv10C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-10")
-	return d
-}
-func NewDiv11C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-11")
-	return d
-}
-func NewDiv12C(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-12")
-	return d
-}
-func NewDivThird(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-third")
-	return d
-}
-func NewDivHalf(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-half")
-	return d
-}
-func NewDivFull(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-full")
-	return d
+func NewColRest(w ...WebUI) *Element {
+	return NewCol("w3-rest", w...)
 }
 
+func NewCard(size string, w ...WebUI) *Element {
+	d := NewDiv(w...)
+	d.SetClass("w3-card")
+	d.SetBeautifulDiv()
+	return NewCol(size, d)
+}
 func NewCardThird(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-third content-card")
-	return d
+	return NewCard("w3-third", w...)
+}
+func NewCardTwoThird(w ...WebUI) *Element {
+	return NewCard("w3-twothird", w...)
+}
+func NewCardQuater(w ...WebUI) *Element {
+	return NewCard("w3-quarter", w...)
+}
+func NewCardThreeQuater(w ...WebUI) *Element {
+	return NewCard("w3-threequarter", w...)
 }
 func NewCardHalf(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-half content-card")
-	return d
+	return NewCard("w3-half", w...)
 }
-func NewCardFull(w ...WebUI) *Element {
-	d := NewDiv(w...)
-	d.SetClass("div-full content-card")
-	return d
+func NewCardRest(w ...WebUI) *Element {
+	return NewCard("w3-rest", w...)
 }

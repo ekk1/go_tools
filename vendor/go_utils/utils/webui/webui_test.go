@@ -1,6 +1,7 @@
 package webui
 
 import (
+	"go_utils/utils"
 	"os"
 	"testing"
 	"time"
@@ -52,7 +53,14 @@ func TestUI(t *testing.T) {
 	chart.AddData(60, 90)
 	chart.AddData(80, 70)
 
-	pane1 := NewCardHalf(hh, text, testPre)
+	paneModal := NewRow(NewCardHalf(hh, text, testPre))
+	paneModal.SetClass("w3-sand")
+	testModal := NewModal("test", "testmodal", paneModal)
+	modalBtn := NewBtn("Open")
+	modalBtn.SetOpenModal("testmodal")
+
+	pane1 := NewCardHalf(hh, text, testPre, modalBtn)
+	pane1.AddChild(testModal)
 	pane2 := NewCardHalf(chart)
 	pane3 := NewCardHalf(hh, form1)
 	pane4 := NewCardHalf(hh, form2)
@@ -67,7 +75,7 @@ func TestUI(t *testing.T) {
 	)
 	pane5 := NewCardHalf(table)
 
-	paneAbout := NewCardFull(
+	paneAbout := NewCardRest(
 		NewHeader("About", "h2"),
 		NewPreText("this is text\njdwioajwd\n\n\n\n\n\n\n\n"),
 	)
@@ -78,5 +86,6 @@ func TestUI(t *testing.T) {
 	base.AddSection("section 2", pane2, pane4)
 	base.AddSection("section 3", pane5, pane5)
 
-	os.WriteFile("output/test.html", []byte(base.Render()), 0644)
+	utils.LogPrintError(os.MkdirAll("output", 0755))
+	utils.LogPrintError(os.WriteFile("output/test.html", []byte(base.Render()), 0644))
 }

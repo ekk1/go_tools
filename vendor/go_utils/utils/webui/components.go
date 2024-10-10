@@ -2,6 +2,7 @@ package webui
 
 import (
 	"fmt"
+	"slices"
 )
 
 type Element struct {
@@ -11,6 +12,7 @@ type Element struct {
 	ValueEnd   string
 	EndTag     string
 	Style      map[string]string
+	Class      []string
 	Children   []WebUI
 }
 
@@ -23,11 +25,42 @@ func (e *Element) SetID(id string) {
 }
 
 func (e *Element) SetClass(class string) {
-	e.SetAttr("class", class)
+	//e.SetAttr("class", class)
+	e.Class = append(e.Class, class)
+}
+
+func (e *Element) RemoveClass(class string) {
+	classIndex := slices.Index(e.Class, class)
+	fmt.Println(classIndex)
+	if classIndex != -1 {
+		e.Class = slices.Delete(e.Class, classIndex, classIndex+1)
+	}
 }
 
 func (e *Element) SetBgColor(color string) {
 	e.Style["background-color"] = color
+}
+
+func (e *Element) SetRound() {
+	e.SetClass("w3-round-xlarge")
+}
+func (e *Element) SetPadding() {
+	e.SetClass("w3-padding")
+}
+func (e *Element) SetMargin() {
+	e.SetClass("w3-margin")
+}
+func (e *Element) SetMarginPadding() {
+	e.SetClass("w3-margin w3-padding")
+}
+func (e *Element) SetBeautifulDiv() {
+	e.SetClass("w3-margin w3-padding w3-round-xlarge")
+}
+
+func (e *Element) SetOpenModal(id string) {
+	e.SetAttr("onclick",
+		"document.getElementById('"+id+"').style.display='block'",
+	)
 }
 
 func (e *Element) SetBorder(color string) {
@@ -36,9 +69,13 @@ func (e *Element) SetBorder(color string) {
 }
 
 func (e *Element) SetContentCenter() {
-	e.Style["align-items"] = "center"
-	e.Style["display"] = "grid"
-	e.Style["text-align"] = "center"
+	e.SetClass("w3-center")
+}
+func (e *Element) SetContentLeft() {
+	e.SetClass("w3-left")
+}
+func (e *Element) SetContentRight() {
+	e.SetClass("w3-right")
 }
 
 func (e *Element) AddChild(w ...WebUI) {
@@ -54,6 +91,13 @@ func (e *Element) Render() string {
 	}
 	if styleString != "" {
 		e.Attributes["style"] = styleString
+	}
+	classStr := ""
+	for _, v := range e.Class {
+		classStr += fmt.Sprintf("%s ", v)
+	}
+	if classStr != "" {
+		e.Attributes["class"] = classStr
 	}
 	attrString := ""
 	for k, v := range e.Attributes {
@@ -79,6 +123,7 @@ func NewElement(tag, value string) *Element {
 		Children:   []WebUI{},
 		Attributes: map[string]string{},
 		Style:      map[string]string{},
+		Class:      []string{},
 	}
 }
 
@@ -89,6 +134,7 @@ func NewElementWithNoEndTag(tag, value string) *Element {
 		Children:   []WebUI{},
 		Attributes: map[string]string{},
 		Style:      map[string]string{},
+		Class:      []string{},
 	}
 }
 

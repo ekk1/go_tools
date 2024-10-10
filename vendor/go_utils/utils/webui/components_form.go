@@ -1,7 +1,6 @@
 package webui
 
 import (
-	"fmt"
 	"go_utils/utils"
 	"strconv"
 	"time"
@@ -9,8 +8,8 @@ import (
 
 func NewForm(targetURL, name string, e ...WebUI) *Element {
 	f := NewElement("form", "")
-	f.Value = fmt.Sprintf("<fieldset><legend>%s</legend>", name)
-	f.ValueEnd = "</fieldset>"
+	//f.Value = fmt.Sprintf("<fieldset><legend>%s</legend>", name)
+	//f.ValueEnd = "</fieldset>"
 	f.SetAttr("action", targetURL)
 	f.SetAttr("method", "post")
 	f.SetAttr("enctype", "multipart/form-data")
@@ -40,12 +39,16 @@ func NewLabel(content string, target string) *Element {
 	return l
 }
 
-func NewTextInput(name string) *GroupElement {
+func NewTextInputWithValue(name, value string) *GroupElement {
 	idSuffix := utils.RandomString(5)
 	return NewGroupElement(
 		NewLabel(name, name+"-"+idSuffix),
-		NewInput(name, "text", "", name+"-"+idSuffix), NewBR(),
+		NewInput(name, "text", value, name+"-"+idSuffix), NewBR(),
 	)
+}
+
+func NewTextInput(name string) *GroupElement {
+	return NewTextInputWithValue(name, "")
 }
 
 func NewTextAreaInput(name string) *GroupElement {
@@ -56,14 +59,6 @@ func NewTextAreaInput(name string) *GroupElement {
 	return NewGroupElement(
 		NewLabel(name, name+"-"+idSuffix), NewBR(),
 		area, NewBR(),
-	)
-}
-
-func NewTextInputWithValue(name, value string) *GroupElement {
-	idSuffix := utils.RandomString(5)
-	return NewGroupElement(
-		NewLabel(name, name+"-"+idSuffix),
-		NewInput(name, "text", value, name+"-"+idSuffix), NewBR(),
 	)
 }
 

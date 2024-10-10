@@ -11,6 +11,9 @@ var BaseHTML string
 //go:embed style.css
 var StyleStr string
 
+//go:embed w3.css
+var W3StyleStr string
+
 type WebUI interface {
 	Render() string
 }
@@ -39,7 +42,7 @@ func (u *Base) Render() string {
 	for _, w := range u.Children {
 		body += w.Render()
 	}
-	return fmt.Sprintf(BaseHTML, u.Title, StyleStr, body)
+	return fmt.Sprintf(BaseHTML, u.Title, W3StyleStr, StyleStr, body)
 }
 
 // NavBase is a simple base with nav div and content div
@@ -59,24 +62,21 @@ func NewNavBase(title string) *NavBase {
 		},
 		NavItems: make(map[string]*Element),
 	}
-	nn := NewColumnDiv()
-	navDiv := NewDiv(nn)
-	navDiv.SetClass("div-nav")
-	contentDiv := NewDiv()
-	contentDiv.SetClass("div-cc")
-	baseDiv := NewColumnDiv(navDiv, contentDiv)
-	baseDiv.SetBgColor("rgba(255,248,220,0.2)")
-	baseDiv.Style["height"] = "100%"
-	baseDiv.Style["width"] = "100%"
-	baseDiv.Style["margin"] = "0"
-	baseDiv.Style["padding"] = "15px"
+	navPane := NewRow()
+	navPane.SetClass("w3-pale-blue")
+	navPane.SetBeautifulDiv()
+	navDiv := NewColQuarter(navPane)
+	navPane.Style["height"] = "100vh"
+
+	contentPane := NewRow()
+	contentPane.SetClass("w3-sand")
+	contentPane.SetBeautifulDiv()
+	contentDiv := NewColThreeQuarter(contentPane)
+
+	baseDiv := NewRow(navDiv, contentDiv)
 	b.Base.AddChild(baseDiv)
-	b.NavPane = nn
-	b.ContentPane = contentDiv
-	navDiv.Style["border-radius"] = "30px"
-	navDiv.SetBgColor("rgba(224,255,255,0.90)")
-	contentDiv.Style["border-radius"] = "30px"
-	contentDiv.SetBgColor("rgba(0,255,127,0.1)")
+	b.NavPane = navPane
+	b.ContentPane = contentPane
 	return b
 }
 
@@ -94,7 +94,7 @@ func (n *NavBase) AddNavItem(title, url string) {
 }
 
 func (n *NavBase) AddSection(title string, ui ...WebUI) {
-	sectionContainer := NewColumnDiv(ui...)
+	sectionContainer := NewRow(ui...)
 	if title != "" {
 		sectionTitle := NewHeader(title, "h4")
 		sectionTitle.Style["margin"] = "1px"

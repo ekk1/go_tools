@@ -1,13 +1,9 @@
 html {
   font-family: monospace;
-  font-size: 16px;
-  box-sizing: border-box;
 }
+
 body {
-  margin: 0;
-  width: 100%;
-  height: 100%;
-  background-color: #f4f4f9;
+  background-color: rgba(244,244,249,0.25);
 }
 
 h1 {
@@ -19,6 +15,7 @@ h1 {
 table {
   width: 100%;
   margin-top: 20px;
+  margin-bottom: 15px;
   border-collapse: collapse;
 }
 table, th, td {
@@ -46,28 +43,18 @@ input {
   padding: 8px 12px;
 }
 
-fieldset {
-  border: 1.5px groove rgba(169,169,169,0.3);
-  border-radius: 10px;
-}
-
-div {
-  padding: 10px;
-  margin: 5px;
-  /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
-}
-
 textarea {
   width: 100%;
-  height: 150px;
+  height: 10rem;
   padding: 15px;
-  margin: 15px 15px 15px 15px;
+  margin: 20px 0px;
   font-family: monospace;
   color: #333;
   background-color: rgba(230, 247, 255, 0.4);
   border: 1px solid #ccc;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-sizing: border-box;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
 
@@ -89,13 +76,13 @@ textarea::placeholder {
   background-color: rgba(0,0,0,0);
   border: 2px solid;
   border-color: rgba(0,0,0,0.5);
-  border-radius: 15px;
+  border-radius: 10px;
   padding: 6px 20px;
   text-align: center;
   text-decoration: none;
   display: inline-block;
   font-size: 16px;
-  transition: 0.4s;
+  transition: 0.2s;
 }
 .btn:hover {
   background-color: #04AA6D;
@@ -114,11 +101,11 @@ textarea::placeholder {
   border-bottom: 3px solid rgba(255,20,147,0.2);
 }
 .nav-btn:hover {
-  background-color: rgba(255,182,193,0.25);
+  background-color: rgba(255,182,193,0.3);
   color: black;
 }
 .nav-btn-selected {
-    background-color: rgba(255,182,193,0.25);
+    background-color: rgba(255,182,193,0.3);
     color: black;
 }
 .nav-btn-div {
@@ -126,84 +113,6 @@ textarea::placeholder {
   margin-top: 20px;
   display: grid;
   align-items: center;
-}
-
-.content-card {
-  background-color: rgba(220,220,220,0.4);
-  border-radius: 30px;
-  padding: 20px 30px 25px;
-  margin: 15px;
-  box-shadow: 1px 1px 6px 3px rgba(0,0,0,0.24);
-}
-
-.ccdiv {
-  display: block;
-}
-
-[class*="div-"] { grid-column: span 1; }
-@media screen and (min-width: 600px) {
-  .ccdiv {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-  }
-  .div-2    { grid-column: span 2; }
-  .div-3    { grid-column: span 3; }
-  .div-4    { grid-column: span 4; }
-  .div-5    { grid-column: span 5; }
-  .div-6    { grid-column: span 6; }
-  .div-7    { grid-column: span 6; }
-  .div-8    { grid-column: span 6; }
-  .div-9    { grid-column: span 6; }
-  .div-10   { grid-column: span 6; }
-  .div-11   { grid-column: span 6; }
-  .div-12   { grid-column: span 6; }
-  .div-third    { grid-column: span 3; }
-  .div-half { grid-column: span 6; }
-  .div-full { grid-column: span 6; }
-  .div-nav  { grid-column: span 6; }
-  .div-cc   { grid-column: span 6; }
-}
-@media screen and (min-width: 768px) {
-  .ccdiv {
-    grid-template-columns: repeat(8, 1fr);
-  }
-  .div-2 { grid-column: span 2; }
-  .div-3 { grid-column: span 3; }
-  .div-4 { grid-column: span 3; }
-  .div-5 { grid-column: span 4; }
-  .div-6 { grid-column: span 4; }
-  .div-7 { grid-column: span 5; }
-  .div-8 { grid-column: span 6; }
-  .div-9 { grid-column: span 6; }
-  .div-10 { grid-column: span 7; }
-  .div-11 { grid-column: span 7; }
-  .div-12 { grid-column: span 8; }
-  .div-third { grid-column: span 3; }
-  .div-half { grid-column: span 4; }
-  .div-full { grid-column: span 8; }
-  .div-nav  { grid-column: span 2; }
-  .div-cc   { grid-column: span 6; }
-}
-@media screen and (min-width: 1200px) {
-  .ccdiv {
-    grid-template-columns: repeat(12, 1fr);
-  }
-  .div-2 { grid-column: span 2; }
-  .div-3 { grid-column: span 3; }
-  .div-4 { grid-column: span 4; }
-  .div-5 { grid-column: span 5; }
-  .div-6 { grid-column: span 6; }
-  .div-7 { grid-column: span 7; }
-  .div-8 { grid-column: span 8; }
-  .div-9 { grid-column: span 9; }
-  .div-10 { grid-column: span 10; }
-  .div-11 { grid-column: span 11; }
-  .div-12 { grid-column: span 12; }
-  .div-third { grid-column: span 4; }
-  .div-half { grid-column: span 6; }
-  .div-full { grid-column: span 12; }
-  .div-nav  { grid-column: span 2; }
-  .div-cc   { grid-column: span 10; }
 }
 
 .css-chart {

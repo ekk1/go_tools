@@ -26,12 +26,10 @@ func NewLinkBtn(content string, link string) *Element {
 	return e
 }
 
-func NewButton(content, link string) *Element {
-	e := NewElement("a", content)
-	e.SetAttr("href", link)
-	b := NewElement("button", "")
-	b.AddChild(e)
-	return b
+func NewBtn(content string) *Element {
+	e := NewElement("button", content)
+	e.SetClass("btn")
+	return e
 }
 
 func NewBR() *Element {
