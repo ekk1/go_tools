@@ -153,3 +153,30 @@ func (g *GroupElement) Render() string {
 	}
 	return ret
 }
+
+type NestedElement struct {
+	e                *Element
+	contentContainer *Element
+}
+
+func NewNestedElement(e *Element, content *Element) *NestedElement {
+	return &NestedElement{
+		e:                e,
+		contentContainer: content,
+	}
+}
+
+func (n *NestedElement) Render() string {
+	return n.e.Render()
+}
+func (n *NestedElement) AddChild(w ...WebUI) {
+	n.contentContainer.AddChild(w...)
+}
+func (n *NestedElement) SetContentCenter(w ...WebUI) {
+	n.e.SetContentCenter()
+}
+
+func (n *NestedElement) SetFlex() {
+	n.contentContainer.Style["display"] = "flex"
+	n.contentContainer.Style["flex-wrap"] = "wrap"
+}

@@ -72,7 +72,7 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 
 	linkDict := prepareLinksData()
 	for _, v := range utils.SortedMapKeys(linkDict) {
-		folderDiv := webui.NewCardFull(
+		folderDiv := webui.NewCardRest(
 			webui.NewHeader(v, "h3"),
 		)
 		slices.Sort(linkDict[v])

@@ -36,27 +36,34 @@ func NewColRest(w ...WebUI) *Element {
 	return NewCol("w3-rest", w...)
 }
 
-func NewCard(size string, w ...WebUI) *Element {
+func NewCard(size string, w ...WebUI) *NestedElement {
 	d := NewDiv(w...)
 	d.SetClass("w3-card")
 	d.SetBeautifulDiv()
-	return NewCol(size, d)
+	col := NewCol(size, d)
+	return NewNestedElement(col, d)
 }
-func NewCardThird(w ...WebUI) *Element {
+func NewCardThird(w ...WebUI) *NestedElement {
 	return NewCard("w3-third", w...)
 }
-func NewCardTwoThird(w ...WebUI) *Element {
+func NewCardTwoThird(w ...WebUI) *NestedElement {
 	return NewCard("w3-twothird", w...)
 }
-func NewCardQuater(w ...WebUI) *Element {
+func NewCardQuater(w ...WebUI) *NestedElement {
 	return NewCard("w3-quarter", w...)
 }
-func NewCardThreeQuater(w ...WebUI) *Element {
+func NewCardThreeQuater(w ...WebUI) *NestedElement {
 	return NewCard("w3-threequarter", w...)
 }
-func NewCardHalf(w ...WebUI) *Element {
+func NewCardHalf(w ...WebUI) *NestedElement {
 	return NewCard("w3-half", w...)
 }
-func NewCardRest(w ...WebUI) *Element {
+func NewCardRest(w ...WebUI) *NestedElement {
 	return NewCard("w3-rest", w...)
+}
+
+func NewDisplayUnit(w ...WebUI) *Element {
+	singleUnit := NewDiv(w...)
+	singleUnit.SetClass("display-unit")
+	return singleUnit
 }

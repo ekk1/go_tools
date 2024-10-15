@@ -27,7 +27,7 @@ func NewImageFromFile(imageType, filename string) *Element {
 	return im
 }
 
-func NewImageFromLink(imageType, imgLink string) *Element {
+func NewImageFromLink(imgLink string) *Element {
 	im := NewElementWithNoEndTag("img", "")
 	im.SetAttr("src", imgLink)
 	return im
