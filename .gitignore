@@ -3,7 +3,7 @@ cmd/logger/logger
 cmd/torrent_checker/torrent_checker
 cmd/myindex/myindex
 cmd/index_interface/main
-*.snapshot
+*.snapshot.*
 *.swp
 *.yml
 *.exe
@@ -19,3 +19,9 @@ cmd/openai_cli/openai_cli
 cmd/ed2k/ed2k
 cmd/novel/*.txt
 .DS_Store
+vendor/go_utils/utils/myhttp/*.crt
+vendor/go_utils/utils/myhttp/*.key
+vendor/go_utils/utils/openai/*.txt
+vendor/go_utils/utils/openai/*.txt_pg
+vendor/go_utils/utils/openai/key.txt_pq
+vendor/go_utils/utils/webui/output/index.html

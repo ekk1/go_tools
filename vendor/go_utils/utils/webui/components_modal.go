@@ -6,6 +6,7 @@ func NewModal(name, id string, w ...WebUI) *Element {
 	modal.SetClass("w3-modal")
 	modalContent := NewDiv()
 	modalContent.SetClass("w3-modal-content w3-animate-top w3-card-4")
+	modalContent.SetClass("w3-round-xlarge w3-sand")
 
 	modalHeader := NewElement("header", "")
 	modalHeader.SetClass("w3-container")

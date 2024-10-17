@@ -54,7 +54,9 @@ func TestUI(t *testing.T) {
 	chart.AddData(80, 70)
 
 	paneModal := NewRow(NewCardHalf(hh, text, testPre))
-	paneModal.SetClass("w3-sand")
+	//paneModal.SetClass("w3-sand")
+	paneModal.AddChild(NewCardHalf(form1))
+	//paneModal.SetBeautifulDiv()
 	testModal := NewModal("test", "testmodal", paneModal)
 	modalBtn := NewBtn("Open")
 	modalBtn.SetOpenModal("testmodal")
@@ -119,4 +121,11 @@ func TestUI(t *testing.T) {
 
 	utils.LogPrintError(os.MkdirAll("output", 0755))
 	utils.LogPrintError(os.WriteFile("output/test.html", []byte(base.Render()), 0644))
+
+	base2 := NewNavBase("Index")
+	base2.AddNavItem("Index", "#")
+	base2.CurrentNavItem = "Index"
+	base2.AddSection("About", paneAbout)
+	utils.LogPrintError(os.WriteFile("output/index.html", []byte(base2.Render()), 0644))
+
 }
