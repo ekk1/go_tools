@@ -35,12 +35,18 @@ th {
 }
 
 input {
-  margin: 6px 1px 6px 4px;
+  margin: 6px;
   font-family: monospace;
   background-color: #fffaf0;
   border: 1px solid #ccc;
-  border-radius: 20px;
-  padding: 3px 2px 3px 8px;
+  border-radius: 15px;
+  padding: 4px 8px;
+}
+
+.text-input {
+  width: 100%;
+  margin-right: 10px;
+  box-sizing: border-box;
 }
 
 textarea {

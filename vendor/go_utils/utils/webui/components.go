@@ -8,6 +8,7 @@ import (
 type Element struct {
 	Tag        string
 	Attributes map[string]string
+	AnonAttr   []string
 	Value      string
 	ValueEnd   string
 	EndTag     string
@@ -18,6 +19,10 @@ type Element struct {
 
 func (e *Element) SetAttr(k, v string) {
 	e.Attributes[k] = v
+}
+
+func (e *Element) SetAnonAttr(v string) {
+	e.AnonAttr = append(e.AnonAttr, v)
 }
 
 func (e *Element) SetID(id string) {
@@ -103,6 +108,9 @@ func (e *Element) Render() string {
 	for k, v := range e.Attributes {
 		attrString += fmt.Sprintf(" %s=\"%s\"", k, v)
 	}
+	for _, v := range e.AnonAttr {
+		attrString += fmt.Sprintf(" %s", v)
+	}
 	childString := ""
 	for _, v := range e.Children {
 		childString += v.Render()
@@ -122,6 +130,7 @@ func NewElement(tag, value string) *Element {
 		Value:      value,
 		Children:   []WebUI{},
 		Attributes: map[string]string{},
+		AnonAttr:   []string{},
 		Style:      map[string]string{},
 		Class:      []string{},
 	}
@@ -133,6 +142,7 @@ func NewElementWithNoEndTag(tag, value string) *Element {
 		Value:      value,
 		Children:   []WebUI{},
 		Attributes: map[string]string{},
+		AnonAttr:   []string{},
 		Style:      map[string]string{},
 		Class:      []string{},
 	}

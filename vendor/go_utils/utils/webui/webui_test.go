@@ -23,8 +23,8 @@ func TestUI(t *testing.T) {
 	text := NewText("test1123")
 	testPre := NewPreText("tet\n123")
 
-	form1 := NewForm("http://127.0.0.1:5000/post", "test")
-	form1.AddChild(
+	form1 := NewForm(
+		"http://127.0.0.1:5000/post", "test",
 		NewTextInputWithValue("test", "value"),
 		NewCheckBox("OK"),
 		NewRadioInput("radio1", "A"),
@@ -33,8 +33,8 @@ func TestUI(t *testing.T) {
 		NewTextAreaInput("page"),
 		NewSubmitBtn("submit", "submit1"),
 	)
-	form2 := NewForm("http://127.0.0.1:5000/post", "test")
-	form2.AddChild(
+	form2 := NewForm(
+		"http://127.0.0.1:5000/post", "test",
 		NewTextInputWithValue("test2", "value"),
 		NewCheckBox("OK2"),
 		NewRadioInput("radio2", "A"),
@@ -54,9 +54,7 @@ func TestUI(t *testing.T) {
 	chart.AddData(80, 70)
 
 	paneModal := NewRow(NewCardHalf(hh, text, testPre))
-	//paneModal.SetClass("w3-sand")
 	paneModal.AddChild(NewCardHalf(form1))
-	//paneModal.SetBeautifulDiv()
 	testModal := NewModal("test", "testmodal", paneModal)
 	modalBtn := NewBtn("Open")
 	modalBtn.SetOpenModal("testmodal")
@@ -79,14 +77,19 @@ func TestUI(t *testing.T) {
 	)
 	pane5 := NewCardHalf(table)
 
+	pageTitle := NewCardRest(
+		NewHeader("Title", "h2"),
+	)
+	pageTitle.SetContentCenter()
+
 	paneAbout := NewCardRest(
 		NewHeader("About", "h2"),
-		NewPreText("this is text\njdwioajwd\n\n\n"),
+		NewPreText("this is text\njdwioajwd\n\n\n\n\n\n"),
 	)
 	paneAbout.SetContentCenter()
 
 	img := NewImageFromLink("placeholder.jpg")
-	img.Style["width"] = "10vw"
+	img.Style["width"] = "7em"
 	img.Style["margin-bottom"] = "20px"
 
 	singleUnit := NewDisplayUnit(
@@ -111,9 +114,9 @@ func TestUI(t *testing.T) {
 	}
 	card.SetFlex()
 
-	base.AddSection("Units", card)
-
+	base.AddSection("", pageTitle)
 	base.AddSection("About", paneAbout)
+	base.AddSection("Units", card)
 	base.AddSection("section 1", pane1, pane3)
 	base.AddSection("section 2", pane2, pane4)
 	base.AddSection("section 3", pane5, pane5)
@@ -127,5 +130,4 @@ func TestUI(t *testing.T) {
 	base2.CurrentNavItem = "Index"
 	base2.AddSection("About", paneAbout)
 	utils.LogPrintError(os.WriteFile("output/index.html", []byte(base2.Render()), 0644))
-
 }

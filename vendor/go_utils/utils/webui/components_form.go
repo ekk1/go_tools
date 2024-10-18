@@ -41,9 +41,11 @@ func NewLabel(content string, target string) *Element {
 
 func NewTextInputWithValue(name, value string) *GroupElement {
 	idSuffix := utils.RandomString(5)
+	txInput := NewInput(name, "text", value, name+"-"+idSuffix)
+	txInput.SetClass("text-input")
 	return NewGroupElement(
 		NewLabel(name, name+"-"+idSuffix),
-		NewInput(name, "text", value, name+"-"+idSuffix), NewBR(),
+		txInput, NewBR(),
 	)
 }
 
