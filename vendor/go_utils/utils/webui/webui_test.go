@@ -130,4 +130,7 @@ func TestUI(t *testing.T) {
 	base2.CurrentNavItem = "Index"
 	base2.AddSection("About", paneAbout)
 	utils.LogPrintError(os.WriteFile("output/index.html", []byte(base2.Render()), 0644))
+
+	login := NewLoginPage("http://127.0.0.1:5000/post", "Demo")
+	utils.LogPrintError(os.WriteFile("output/login.html", []byte(login.Render()), 0644))
 }

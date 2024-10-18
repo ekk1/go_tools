@@ -39,9 +39,9 @@ func NewLabel(content string, target string) *Element {
 	return l
 }
 
-func NewTextInputWithValue(name, value string) *GroupElement {
+func NewGroupInput(name, value, iType string) *GroupElement {
 	idSuffix := utils.RandomString(5)
-	txInput := NewInput(name, "text", value, name+"-"+idSuffix)
+	txInput := NewInput(name, iType, value, name+"-"+idSuffix)
 	txInput.SetClass("text-input")
 	return NewGroupElement(
 		NewLabel(name, name+"-"+idSuffix),
@@ -49,8 +49,15 @@ func NewTextInputWithValue(name, value string) *GroupElement {
 	)
 }
 
+func NewTextInputWithValue(name, value string) *GroupElement {
+	return NewGroupInput(name, value, "text")
+}
 func NewTextInput(name string) *GroupElement {
 	return NewTextInputWithValue(name, "")
+}
+
+func NewPasswordInput(name string) *GroupElement {
+	return NewGroupInput(name, "", "password")
 }
 
 func NewTextAreaInput(name string) *GroupElement {
