@@ -91,6 +91,7 @@ func handleRoot(w http.ResponseWriter, req *http.Request) {
 		switch {
 		case errors.Is(err, http.ErrNoCookie):
 			http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
+			return
 		default:
 			utils.LogPrintError(err)
 			myhttp.ServerError("server error", w, req)
