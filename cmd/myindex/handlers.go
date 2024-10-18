@@ -1,16 +1,14 @@
 package main
 
 import (
+	"errors"
 	"go_utils/utils"
 	"go_utils/utils/myhttp"
 	"go_utils/utils/webui"
 	"net/http"
 	"slices"
 	"strings"
-)
-
-var (
-	pageMsg string
+	"time"
 )
 
 func prepareLinksData() map[string][]string {
@@ -30,7 +28,7 @@ func prepareLinksData() map[string][]string {
 	return linkDict
 }
 
-func renderPage(w http.ResponseWriter, req *http.Request) {
+func renderPage(w http.ResponseWriter, _ *http.Request) {
 	base := webui.NewNavBase("myindex")
 
 	base.AddNavItem("Index", "/")
@@ -88,7 +86,37 @@ func renderPage(w http.ResponseWriter, req *http.Request) {
 }
 
 func handleRoot(w http.ResponseWriter, req *http.Request) {
+	authCookie, err := req.Cookie("authToken")
+	if err != nil {
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
+		default:
+			utils.LogPrintError(err)
+			myhttp.ServerError("server error", w, req)
+			return
+		}
+	}
+	if ts, ok := cookieCache[authCookie.Value]; !ok {
+		http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
+	} else {
+		timeCookie := time.Unix(ts, 0)
+		timePassed := time.Now().Sub(timeCookie)
+		if timePassed.Hours() > 1 {
+			http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
+		}
+	}
 	renderPage(w, req)
+}
+
+func handleLoginPage(w http.ResponseWriter, _ *http.Request) {
+	login := webui.NewLoginPage("/login", "MyIndex")
+	w.Write([]byte(login.Render()))
+}
+
+func handleLogin(w http.ResponseWriter, _ *http.Request) {
+	login := webui.NewLoginPage("/login", "MyIndex")
+	w.Write([]byte(login.Render()))
 }
 
 func handleAdd(w http.ResponseWriter, req *http.Request) {

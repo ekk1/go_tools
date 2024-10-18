@@ -9,6 +9,8 @@ import (
 
 var kv *minikv.KV
 
+var cookieCache map[string]int64 = map[string]int64{}
+
 func main() {
 	var verboseFlag = flag.Int("v", 0, "debug (max 4)")
 	var listenAddr = flag.String("l", "127.0.0.1", "listen address")
@@ -22,6 +24,8 @@ func main() {
 
 	ii := myhttp.NewServer("index", *listenAddr, *listenPort)
 	ii.AddGet("/", handleRoot)
+	ii.AddGet("/loginpage", handleLoginPage)
+	ii.AddPost("/login", handleLogin)
 	ii.AddPost("/add", handleAdd)
 	ii.AddPost("/delete", handleDelete)
 	ii.AddPost("/move", handleMove)
