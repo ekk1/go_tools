@@ -1,7 +1,9 @@
 package main
 
 import (
-	"errors"
+	"crypto/rand"
+	"crypto/sha512"
+	"encoding/hex"
 	"go_utils/utils"
 	"go_utils/utils/myhttp"
 	"go_utils/utils/webui"
@@ -86,27 +88,6 @@ func renderPage(w http.ResponseWriter, _ *http.Request) {
 }
 
 func handleRoot(w http.ResponseWriter, req *http.Request) {
-	authCookie, err := req.Cookie("authToken")
-	if err != nil {
-		switch {
-		case errors.Is(err, http.ErrNoCookie):
-			http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
-			return
-		default:
-			utils.LogPrintError(err)
-			myhttp.ServerError("server error", w, req)
-			return
-		}
-	}
-	if ts, ok := cookieCache[authCookie.Value]; !ok {
-		http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
-	} else {
-		timeCookie := time.Unix(ts, 0)
-		timePassed := time.Now().Sub(timeCookie)
-		if timePassed.Hours() > 1 {
-			http.Redirect(w, req, "/loginpage", http.StatusSeeOther)
-		}
-	}
 	renderPage(w, req)
 }
 
@@ -115,9 +96,67 @@ func handleLoginPage(w http.ResponseWriter, _ *http.Request) {
 	w.Write([]byte(login.Render()))
 }
 
-func handleLogin(w http.ResponseWriter, _ *http.Request) {
-	login := webui.NewLoginPage("/login", "MyIndex")
-	w.Write([]byte(login.Render()))
+func handleLogin(w http.ResponseWriter, rr *http.Request) {
+	username := rr.FormValue("Username")
+	password := rr.FormValue("Password")
+	if !myhttp.ServerCheckParam(username, password) {
+		myhttp.ServerError("Field can not be empty", w, rr)
+		return
+	}
+
+	if expectedPassword, ok := authDB[username]; !ok {
+		myhttp.AuditSeverLog("Invalid username: "+username, rr)
+		w.WriteHeader(http.StatusUnauthorized)
+		w.Write([]byte("Invalid username and password"))
+		return
+	} else {
+		h := sha512.New()
+		h.Write([]byte(password))
+		result := h.Sum(nil)
+		hexResult := hex.EncodeToString(result)
+		if hexResult != expectedPassword {
+			myhttp.AuditSeverLog("Invalid password: "+password, rr)
+			w.WriteHeader(http.StatusUnauthorized)
+			w.Write([]byte("Invalid username and password"))
+			return
+		}
+	}
+	myhttp.AuditSeverLog("Successful login for: "+username, rr)
+	randomCookieStr := ""
+	for {
+		randomCookie := make([]byte, 32)
+		if n, err := rand.Read(randomCookie); err != nil {
+			myhttp.AuditSeverLog("Failed to generate cookie"+err.Error(), rr)
+			myhttp.ServerError("Failed to generate cookie", w, rr)
+			return
+		} else {
+			if n != 32 {
+				myhttp.AuditSeverLog("Failed to generate cookie: length dont match", rr)
+				myhttp.ServerError("Failed to generate cookie", w, rr)
+				return
+			}
+		}
+
+		randomCookieStr = hex.EncodeToString(randomCookie)
+
+		if _, ok := cookieCache[randomCookieStr]; !ok {
+			break
+		}
+	}
+	cookie := http.Cookie{
+		Name:     "authToken",
+		Value:    randomCookieStr,
+		Path:     "/",
+		MaxAge:   3600,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
+	}
+
+	http.SetCookie(w, &cookie)
+	cookieCache[randomCookieStr] = time.Now().Unix()
+	http.Redirect(w, rr, "/", http.StatusSeeOther)
+	return
 }
 
 func handleAdd(w http.ResponseWriter, req *http.Request) {
