@@ -22,18 +22,21 @@ var (
 	pow10i64Len = len(pow10i64)
 )
 
+// BencodeDecoder is a structure that holds the state for decoding Bencode encoded data.
 type BencodeDecoder struct {
-	data   []byte
-	length int
-	cursor int
+	data   []byte // data is the raw Bencode encoded data to be decoded.
+	length int    // length is the length of the data to be decoded.
+	cursor int    // cursor represents the current position in the data being decoded.
 }
 
+// Decode takes a byte slice of Bencode encoded data and returns the decoded value as an interface{}.
 func (d *BencodeDecoder) Decode(data []byte) (interface{}, error) {
 	d.data = data
 	d.length = len(data)
 	return d.decode()
 }
 
+// decode is an internal method that handles the recursive decoding of Bencode data.
 func (d *BencodeDecoder) decode() (interface{}, error) {
 	switch d.data[d.cursor] {
 	case BencodeInt:
@@ -81,6 +84,7 @@ func (d *BencodeDecoder) decode() (interface{}, error) {
 	}
 }
 
+// decodeBytes is an internal method that decodes Bencode byte string fields.
 func (d *BencodeDecoder) decodeBytes() ([]byte, error) {
 	if d.data[d.cursor] < '0' || d.data[d.cursor] > '9' {
 		return nil, errors.New("bencode: invalid string field")
@@ -104,6 +108,7 @@ func (d *BencodeDecoder) decodeBytes() ([]byte, error) {
 	return value, nil
 }
 
+// parseInt is an internal method used to parse integers from a byte slice.
 func (d *BencodeDecoder) parseInt(data []byte) (int64, error) {
 	isNegative := false
 	if data[0] == '-' {
@@ -129,6 +134,7 @@ func (d *BencodeDecoder) parseInt(data []byte) (int64, error) {
 	return sum, nil
 }
 
+// decodeInt is an internal method that decodes Bencode integer fields.
 func (d *BencodeDecoder) decodeInt() (interface{}, error) {
 	d.cursor += 1
 	index := bytes.IndexByte(d.data[d.cursor:], 'e')

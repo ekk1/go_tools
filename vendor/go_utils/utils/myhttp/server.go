@@ -2,6 +2,7 @@ package myhttp
 
 import (
 	"crypto/x509"
+	"errors"
 	"fmt"
 	"go_utils/utils"
 	"net/http"
@@ -38,6 +39,15 @@ func ServerLog(caller string, r *http.Request) {
 		"[%s]: got %s from %s for %s, Host: %s",
 		caller, r.Method, r.RemoteAddr, r.URL.Path, r.Host,
 	))
+}
+
+func AuditSeverLog(msg string, r *http.Request) {
+	utils.LogPrintWarning(
+		fmt.Sprintf(
+			"%s. Remote IP: %s, URI: %s",
+			msg, r.RemoteAddr, r.URL.String(),
+		),
+	)
 }
 
 func ServerReply(msg string, w http.ResponseWriter) {
@@ -80,6 +90,35 @@ func HandlerMakerNoLog(method []string, path string, h http.HandlerFunc) (string
 	}
 }
 
+func CookieChecker(cookieName string,
+	redirectURL string,
+	checkFunc func(string) (string, bool),
+	h http.HandlerFunc,
+) http.HandlerFunc {
+	return func(ww http.ResponseWriter, rr *http.Request) {
+		authCookie, err := rr.Cookie(cookieName)
+		if err != nil {
+			switch {
+			case errors.Is(err, http.ErrNoCookie):
+				AuditSeverLog("No auth cookie found, redirecting.", rr)
+				http.Redirect(ww, rr, redirectURL, http.StatusSeeOther)
+				return
+			default:
+				utils.LogPrintError("Server error: ", err)
+				ServerError("server error", ww, rr)
+				return
+			}
+		}
+		if reason, ok := checkFunc(authCookie.Value); !ok {
+			AuditSeverLog("Cookie auth failed: "+reason, rr)
+			http.Redirect(ww, rr, redirectURL, http.StatusSeeOther)
+			return
+		}
+
+		h(ww, rr)
+	}
+}
+
 func TokenChecker(tokenKey string, allowedTokens []string, h http.HandlerFunc) http.HandlerFunc {
 	return func(ww http.ResponseWriter, rr *http.Request) {
 		token := rr.Header.Get(tokenKey)
@@ -93,6 +132,7 @@ func TokenChecker(tokenKey string, allowedTokens []string, h http.HandlerFunc) h
 
 func ClientTLSChecker(h http.HandlerFunc) http.HandlerFunc {
 	return func(ww http.ResponseWriter, rr *http.Request) {
+		//TODO: Check cert valid?
 		// Check cert exists
 		if rr.TLS == nil {
 			ww.WriteHeader(http.StatusUnauthorized)
